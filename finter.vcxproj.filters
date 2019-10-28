@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{f1f49a10-975c-4f3d-8bf6-a93952d2bce3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdparty">
+      <UniqueIdentifier>{c649cd6e-a4db-4587-8687-a76ffc3e0c9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdparty\imgui">
+      <UniqueIdentifier>{6cdedde9-167f-4564-84b6-cf44a713e13d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\defines.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\interpolator.h" />
+    <ClInclude Include="3rdparty\imgui\imgui_impl_dx11.h">
+      <Filter>3rdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\imgui\imgui_impl_win32.h">
+      <Filter>3rdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\imgui\imgui_internal.h">
+      <Filter>3rdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\imgui\imgui_stdlib.h">
+      <Filter>3rdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\imgui\imstb_rectpack.h">
+      <Filter>3rdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\imgui\imstb_textedit.h">
+      <Filter>3rdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\imgui\imstb_truetype.h">
+      <Filter>3rdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\imgui\imconfig.h">
+      <Filter>3rdparty\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\imgui\imgui.h">
+      <Filter>3rdparty\imgui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\interpolator.cpp" />
+    <ClCompile Include="3rdparty\imgui\imgui_draw.cpp">
+      <Filter>3rdparty\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdparty\imgui\imgui_impl_dx11.cpp">
+      <Filter>3rdparty\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdparty\imgui\imgui_impl_win32.cpp">
+      <Filter>3rdparty\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdparty\imgui\imgui_stdlib.cpp">
+      <Filter>3rdparty\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdparty\imgui\imgui_widgets.cpp">
+      <Filter>3rdparty\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdparty\imgui\imgui.cpp">
+      <Filter>3rdparty\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="3rdparty\imgui\imgui_demo.cpp">
+      <Filter>3rdparty\imgui</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
