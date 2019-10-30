@@ -149,6 +149,7 @@
     <ClInclude Include="3rdparty\imgui\imstb_truetype.h" />
     <ClInclude Include="src\defines.h" />
     <ClInclude Include="src\interpolator.h" />
+    <ClInclude Include="src\math.h" />
     <ClInclude Include="src\renderer.h" />
   </ItemGroup>
   <ItemGroup>
