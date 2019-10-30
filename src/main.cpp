@@ -5,6 +5,7 @@
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include <tchar.h>
+#include <time.h>
 
 #include "renderer.h"
 
@@ -24,6 +25,9 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 // Main code
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) 
 {
+    // Initialize random seed
+    srand(time(NULL));
+
     // Create application window
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L,
         GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("Finter"), NULL };
