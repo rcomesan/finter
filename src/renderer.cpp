@@ -3,6 +3,7 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "math.h"
+#include "latex.hpp"
 
 #include <algorithm>
 
@@ -10,6 +11,10 @@ namespace finter
 {
     Renderer::Renderer()
     {
+        // Latex demo
+        Latex latex;
+        latex.to_png("\\frac{1}{2} + \\pi \\cdot 2", Latex::tmp_folder_path() + "asd.png");
+
         // set our theme
         ImGui::StyleColorsDark();
 

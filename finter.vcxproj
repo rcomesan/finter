@@ -70,12 +70,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IntDir>build\$(Configuration.toLower())\</IntDir>
-    <OutDir>build\$(Configuration.toLower())\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration.toLower())\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration.toLower())\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>build\$(Configuration.toLower())\</IntDir>
-    <OutDir>build\$(Configuration.toLower())\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration.toLower())\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration.toLower())\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration.toLower())\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration.toLower())\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration.toLower())\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration.toLower())\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -83,12 +91,13 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>3rdparty\wkhtmltox\include;3rdparty\imgui;3rdparty\v8\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;v8.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;wkhtmltox.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>3rdparty\wkhtmltox;3rdparty\v8\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -97,11 +106,19 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>3rdparty\imgui;3rdparty\v8\include;3rdparty\wkhtmltox\include;3rdparty\latexpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;v8.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;wkhtmltox.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>3rdparty\v8\debug;3rdparty\wkhtmltox;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /D "$(ProjectDir)3rdparty\v8\$(Configuration.toLower())\*.dll"  "$(OutDir)"
+xcopy /Y /D "$(ProjectDir)3rdparty\v8\$(Configuration.toLower())\*.bin"  "$(OutDir)"
+xcopy /Y /D "$(ProjectDir)3rdparty\v8\$(Configuration.toLower())\*.dat"  "$(OutDir)"
+xcopy /Y /D "$(ProjectDir)3rdparty\wkhtmltox\*.dll"  "$(OutDir)"
+xcopy /Y /D /S /I "$(ProjectDir)3rdparty\katex\*"  "$(OutDir)\katex" </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -111,14 +128,15 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>3rdparty\wkhtmltox\include;3rdparty\imgui;3rdparty\v8\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;v8.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;wkhtmltox.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>3rdparty\v8\release;3rdparty\wkhtmltox;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -129,13 +147,21 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>3rdparty\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>3rdparty\imgui;3rdparty\v8\include;3rdparty\wkhtmltox\include;3rdparty\latexpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>d3d11.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;v8.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;wkhtmltox.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>3rdparty\v8\release;3rdparty\wkhtmltox;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /D "$(ProjectDir)3rdparty\v8\$(Configuration.toLower())\*.dll"  "$(OutDir)"
+xcopy /Y /D "$(ProjectDir)3rdparty\v8\$(Configuration.toLower())\*.bin"  "$(OutDir)"
+xcopy /Y /D "$(ProjectDir)3rdparty\v8\$(Configuration.toLower())\*.dat"  "$(OutDir)"
+xcopy /Y /D "$(ProjectDir)3rdparty\wkhtmltox\*.dll"  "$(OutDir)"
+xcopy /Y /D /S /I "$(ProjectDir)3rdparty\katex\*"  "$(OutDir)\katex" </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\imgui\imconfig.h" />
@@ -147,6 +173,26 @@
     <ClInclude Include="3rdparty\imgui\imstb_rectpack.h" />
     <ClInclude Include="3rdparty\imgui\imstb_textedit.h" />
     <ClInclude Include="3rdparty\imgui\imstb_truetype.h" />
+    <ClInclude Include="3rdparty\latexpp\latex.hpp" />
+    <ClInclude Include="3rdparty\v8\include\libplatform\libplatform-export.h" />
+    <ClInclude Include="3rdparty\v8\include\libplatform\libplatform.h" />
+    <ClInclude Include="3rdparty\v8\include\libplatform\v8-tracing.h" />
+    <ClInclude Include="3rdparty\v8\include\v8-inspector-protocol.h" />
+    <ClInclude Include="3rdparty\v8\include\v8-inspector.h" />
+    <ClInclude Include="3rdparty\v8\include\v8-internal.h" />
+    <ClInclude Include="3rdparty\v8\include\v8-platform.h" />
+    <ClInclude Include="3rdparty\v8\include\v8-profiler.h" />
+    <ClInclude Include="3rdparty\v8\include\v8-testing.h" />
+    <ClInclude Include="3rdparty\v8\include\v8-util.h" />
+    <ClInclude Include="3rdparty\v8\include\v8-value-serializer-version.h" />
+    <ClInclude Include="3rdparty\v8\include\v8-version-string.h" />
+    <ClInclude Include="3rdparty\v8\include\v8-version.h" />
+    <ClInclude Include="3rdparty\v8\include\v8-wasm-trap-handler-posix.h" />
+    <ClInclude Include="3rdparty\v8\include\v8-wasm-trap-handler-win.h" />
+    <ClInclude Include="3rdparty\v8\include\v8.h" />
+    <ClInclude Include="3rdparty\v8\include\v8config.h" />
+    <ClInclude Include="3rdparty\wkhtmltox\include\wkhtmltox\image.h" />
+    <ClInclude Include="3rdparty\wkhtmltox\include\wkhtmltox\pdf.h" />
     <ClInclude Include="src\defines.h" />
     <ClInclude Include="src\interpolator.h" />
     <ClInclude Include="src\math.h" />
@@ -160,9 +206,14 @@
     <ClCompile Include="3rdparty\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="3rdparty\imgui\imgui_stdlib.cpp" />
     <ClCompile Include="3rdparty\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="3rdparty\latexpp\latex.cpp" />
     <ClCompile Include="src\interpolator.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\renderer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="3rdparty\wkhtmltox\include\wkhtmltox\dllbegin.inc" />
+    <None Include="3rdparty\wkhtmltox\include\wkhtmltox\dllend.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

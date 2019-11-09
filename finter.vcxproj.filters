@@ -10,6 +10,18 @@
     <Filter Include="3rdparty\imgui">
       <UniqueIdentifier>{6cdedde9-167f-4564-84b6-cf44a713e13d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="3rdparty\latexpp">
+      <UniqueIdentifier>{af601825-7352-4548-9d6d-8fb9e556a681}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdparty\wkhtmltox">
+      <UniqueIdentifier>{7ee07676-72f7-45e1-adf3-41b02342f57e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdparty\v8">
+      <UniqueIdentifier>{32398b4c-ced4-482b-9590-332e48c1c5e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rdparty\v8\libplatform">
+      <UniqueIdentifier>{19ef8c7b-0705-47b5-a383-2a9f74a4f9c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\defines.h">
@@ -49,6 +61,66 @@
     <ClInclude Include="src\math.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="3rdparty\latexpp\latex.hpp">
+      <Filter>3rdparty\latexpp</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\wkhtmltox\include\wkhtmltox\pdf.h">
+      <Filter>3rdparty\wkhtmltox</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\wkhtmltox\include\wkhtmltox\image.h">
+      <Filter>3rdparty\wkhtmltox</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8-profiler.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8-testing.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8-util.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8-value-serializer-version.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8-version.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8-version-string.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8-wasm-trap-handler-posix.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8-wasm-trap-handler-win.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8config.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8-inspector.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8-inspector-protocol.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8-internal.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\v8-platform.h">
+      <Filter>3rdparty\v8</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\libplatform\libplatform-export.h">
+      <Filter>3rdparty\v8\libplatform</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\libplatform\v8-tracing.h">
+      <Filter>3rdparty\v8\libplatform</Filter>
+    </ClInclude>
+    <ClInclude Include="3rdparty\v8\include\libplatform\libplatform.h">
+      <Filter>3rdparty\v8\libplatform</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -79,5 +151,16 @@
     <ClCompile Include="3rdparty\imgui\imgui_demo.cpp">
       <Filter>3rdparty\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="3rdparty\latexpp\latex.cpp">
+      <Filter>3rdparty\latexpp</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="3rdparty\wkhtmltox\include\wkhtmltox\dllbegin.inc">
+      <Filter>3rdparty\wkhtmltox</Filter>
+    </None>
+    <None Include="3rdparty\wkhtmltox\include\wkhtmltox\dllend.inc">
+      <Filter>3rdparty\wkhtmltox</Filter>
+    </None>
   </ItemGroup>
 </Project>
