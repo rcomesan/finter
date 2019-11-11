@@ -3,19 +3,19 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "math.h"
-#include "latex.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+#include <inttypes.h>
 #include <algorithm>
 
 namespace finter
 {
-    Renderer::Renderer()
+    Renderer::Renderer(ID3D11Device* _pd3dDevice)
     {
-        // Latex demo
-        Latex latex;
-        latex.to_png("\\frac{1}{2} + \\pi \\cdot 2", Latex::tmp_folder_path() + "asd.png");
+        device = _pd3dDevice;
 
-        // set our theme
         ImGui::StyleColorsDark();
 
         ImGuiStyle& s = ImGui::GetStyle();
@@ -38,19 +38,20 @@ namespace finter
 
         rangeMin = { -100, -100 };
         rangeMax = { 100, 100 };
+
+        latexLagrange.steps.reserve(MAX_DATAPOINTS);
+        latexNewtonPr.steps.reserve(MAX_DATAPOINTS);
+        latexNewtonRe.steps.reserve(MAX_DATAPOINTS);
     }
 
     Renderer::~Renderer()
     {
-
     }
 
     void Renderer::Draw()
     {
-        // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-
+        static bool show = true;
+        ImGui::ShowDemoWindow(&show);
         drawPanelLeft();
         drawPanelMiddle();
         drawPanelBottom();
@@ -112,14 +113,29 @@ namespace finter
 
             ImGui::Separator();
 
+            const char* name;
+
             if (ImGui::BeginTabBar("Polynomials", ImGuiTabBarFlags_None))
             {
-                if (ImGui::BeginTabItem("Lagrange"))
+                name = "Lagrange";
+                if (ImGui::BeginTabItem(name))
                 {
-                    static int32_t degree = curIntp->datapoints.size() - 1;
-                    ImGui::DragInt("Degree", &degree, 0.0f, 0, 0, "%i");
+                    int32_t degree = i32max(0, curIntp->datapoints.size() - 1);
+                    ImGui::Text("Polynomial of Degree %" PRId32, degree);
+
+                    Renderer::drawLatex(latexLagrange.px.c_str());
+                    
+                    if (ImGui::Button("Show Step-by-Step Solution", ImVec2(ImGui::GetContentRegionAvailWidth(), 40.0f)))
+                    {
+                        stepByStepOpened = true;
+                        Renderer::refreshLatexFormulas(true);
+                        ImGui::OpenPopup("Step-by-Step Solution");
+                    }
+                    drawPopupStepByStepSolution(name, latexLagrange);
                     
                     ImGui::Separator();
+
+                    ImGui::Text("Evaluate");
                     if (ImGui::SliderFloat("Input", &curPoint.x, -100.0f, 100.0f, "P(%.4f)"))
                         curPoint.y = Lagrange::eval(curIntp->datapoints, curPoint.x);
                     ImGui::DragFloat("Output", &curPoint.y, 0.0f, 0.0f, 0.0f, "%.4f", 0.0f);
@@ -171,7 +187,7 @@ namespace finter
         ImGui::InvisibleButton("graph", ImVec2(MIDDLE_PANEL_WIDTH, GRAPH_HEIGHT));
 
         ImDrawList* dl = ImGui::GetOverlayDrawList();
-
+        
         if (goptAxes.visible)
             drawGraphAxes(dl, goptAxes.color);
 
@@ -311,18 +327,50 @@ namespace finter
         }
     }
 
+    void Renderer::drawPopupStepByStepSolution(const char* _name, LatexData& _data)
+    {
+        ImGuiWindowFlags wflags = ImGuiWindowFlags_None
+            | ImGuiWindowFlags_NoMove
+            | ImGuiWindowFlags_NoCollapse
+            | ImGuiWindowFlags_NoSavedSettings
+            | ImGuiWindowFlags_AlwaysUseWindowPadding;
+
+        ImGui::SetNextWindowSize(ImVec2(800, 0));
+
+        if (ImGui::BeginPopupModal("Step-by-Step Solution", &stepByStepOpened, wflags))
+        {
+            ImGui::Text(_name);
+            Renderer::drawLatex(_data.px.c_str());
+
+            for (uint32_t i = 0; i < _data.steps.size(); i++)
+            {
+                ImGui::Separator();
+                Renderer::drawLatex(_data.steps[i].c_str());
+            }
+
+            if (!stepByStepOpened)
+            {
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+    }
+
     void Renderer::drawListboxDataPoints(std::vector<ImVec2>& _data, ImVec2** _pointSelected)
     {
-        static bool isSelected = false;     // true if a given list item is currently selected
-        static bool isModified = false;     // true if our dataset was modified and a recalculation is needed
+        bool isSelected = false;     // true if a given list item is currently selected
+        bool isModified = false;     // true if our dataset was modified and a recalculation is needed
 
         if (ImGui::Button("Clear"))
         {
+            isModified = true;
             _data.clear();
         }
         ImGui::SameLine();
         if (ImGui::Button("Remove"))
         {
+            isModified = true;
             _data.erase(
                 std::remove_if(_data.begin(), _data.end(), [_pointSelected](ImVec2& _v) { return &_v == (*_pointSelected); }),
                 _data.end()
@@ -331,17 +379,15 @@ namespace finter
         ImGui::SameLine();
         if (ImGui::Button("Add"))
         {
+            isModified = true;
             _data.emplace_back(0.0f, 0.0f);
         }
-        if (ImGui::BeginPopupContextWindow("add-context-menu"))
+        ImGui::SameLine();
+        if(ImGui::Button("Add Rnd"))
         {
-            if (ImGui::MenuItem("Add Random Point"))
-            {
-                static uint32_t rgX = (uint32_t)(abs(rangeMax.x - rangeMin.x));
-
-                _data.emplace_back(rangeMin.x + rand() % rgX, rangeMin.x + rand() % rgX);
-            }
-            ImGui::EndPopup();
+            isModified = true;
+            static uint32_t rgX = (uint32_t)(abs(rangeMax.x - rangeMin.x));
+            _data.emplace_back(rangeMin.x + rand() % rgX, rangeMin.x + rand() % rgX);               
         }
 
         if (ImGui::ListBoxHeader("Datapoints"))
@@ -363,6 +409,7 @@ namespace finter
         {
             curIntp->recalculate();
             curPoint.y = Lagrange::eval(curIntp->datapoints, curPoint.x);
+            refreshLatexFormulas(false);
         }
     }
 
@@ -465,6 +512,102 @@ namespace finter
         ImGui::Checkbox(_label, &_opt.visible);
     }
 
+    void Renderer::drawLatex(const char* _latex)
+    {
+        auto tex = texMap.find(std::string(_latex));
+        if (tex == texMap.end())
+        {
+            TextureData* texd = new TextureData();
+
+            latex.to_png(_latex, Latex::tmp_png_path());
+            if (Renderer::loadTextureFromFile(Latex::tmp_png_path().c_str(), &texd->srv, &texd->w, &texd->h))
+            {
+                texd->latex = std::string(_latex);
+                texMap.insert(std::pair<std::string, TextureData*>(std::string(_latex), texd));
+
+                if (texLru.size() >= TEXTURES_CACHE_SIZE)
+                {
+                    auto it = texLru.end();
+                    for (int32_t i = 0; i < texLru.size() - TEXTURES_CACHE_SIZE + 1; i++)
+                    {
+                        texLru.erase(it);
+                        texMap.erase((*it)->latex);
+
+                        (*it)->srv->Release();
+                        delete (*it);
+
+                        it--;
+                    }
+                }
+                texLru.push_front(texd);
+                texd->lruIt = texLru.begin();
+                tex = texMap.find(std::string(_latex));
+            }
+        }
+        else
+        {
+            // cache hit. bring it to the front
+            if (texLru.begin() != tex->second->lruIt)
+            {
+                texLru.splice(texLru.begin(), texLru, tex->second->lruIt, std::next(tex->second->lruIt));
+            }
+        }
+
+        ImGui::PushID(tex->second->srv);
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+        ImGui::BeginChild("latex-formula-container", ImVec2(ImGui::GetContentRegionAvailWidth(), tex->second->h + 15), false, ImGuiWindowFlags_HorizontalScrollbar);
+        ImGui::Image(tex->second->srv, ImVec2(tex->second->w, tex->second->h));
+        ImGui::EndChild();
+        ImGui::PopStyleColor();
+        ImGui::PopID();
+    }
+    
+    bool Renderer::loadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height)
+    {
+        // Load from disk into a raw RGBA buffer
+        int image_width = 0;
+        int image_height = 0;
+        unsigned char* image_data = stbi_load(filename, &image_width, &image_height, NULL, 4);
+        if (image_data == NULL)
+            return false;
+
+        // Create texture
+        D3D11_TEXTURE2D_DESC desc;
+        ZeroMemory(&desc, sizeof(desc));
+        desc.Width = image_width;
+        desc.Height = image_height;
+        desc.MipLevels = 1;
+        desc.ArraySize = 1;
+        desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        desc.SampleDesc.Count = 1;
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        desc.CPUAccessFlags = 0;
+
+        ID3D11Texture2D *pTexture = NULL;
+        D3D11_SUBRESOURCE_DATA subResource;
+        subResource.pSysMem = image_data;
+        subResource.SysMemPitch = desc.Width * 4;
+        subResource.SysMemSlicePitch = 0;
+        device->CreateTexture2D(&desc, &subResource, &pTexture);
+
+        // Create texture view
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+        ZeroMemory(&srvDesc, sizeof(srvDesc));
+        srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MipLevels = desc.MipLevels;
+        srvDesc.Texture2D.MostDetailedMip = 0;
+        device->CreateShaderResourceView(pTexture, &srvDesc, out_srv);
+        pTexture->Release();
+
+        *out_width = image_width;
+        *out_height = image_height;
+        stbi_image_free(image_data);
+
+        return true;
+    }
+
     void Renderer::PushDisabled()
     {
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.35);
@@ -518,6 +661,23 @@ namespace finter
             gdataNewtonRe.yS.push_back(y);
 
             x += increment;
+        }
+    }
+
+    void Renderer::refreshLatexFormulas(bool _steps)
+    {
+        if (_steps)
+        {
+            latexLagrange.steps.resize(curIntp->datapoints.size());
+
+            for (uint32_t i = 0; i < curIntp->datapoints.size(); i++)
+            {
+                Lagrange::latexLx(curIntp->datapoints, i, latexLagrange.steps[i]);
+            }
+        }
+        else
+        {
+            Lagrange::latexPx(curIntp->datapoints, latexLagrange.px);
         }
     }
 }

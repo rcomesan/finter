@@ -106,7 +106,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>3rdparty\imgui;3rdparty\v8\include;3rdparty\wkhtmltox\include;3rdparty\latexpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>3rdparty\stb;3rdparty\imgui;3rdparty\v8\include;3rdparty\wkhtmltox\include;3rdparty\latexpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>d3d11.lib;v8.dll.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;wkhtmltox.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -147,7 +147,7 @@ xcopy /Y /D /S /I "$(ProjectDir)3rdparty\katex\*"  "$(OutDir)\katex" </Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>3rdparty\imgui;3rdparty\v8\include;3rdparty\wkhtmltox\include;3rdparty\latexpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>3rdparty\stb;3rdparty\imgui;3rdparty\v8\include;3rdparty\wkhtmltox\include;3rdparty\latexpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

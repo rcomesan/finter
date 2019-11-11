@@ -76,7 +76,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     // Main loop
     ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
-    finter::Renderer r;
+    finter::Renderer r(g_pd3dDevice);
 
     MSG msg;
     ZeroMemory(&msg, sizeof(msg));

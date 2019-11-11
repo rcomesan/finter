@@ -30,6 +30,16 @@ namespace finter
         return _a > _b ? _a : _b;
     }
 
+    inline float i32min(int32_t _a, int32_t _b)
+    {
+        return _a < _b ? _a : _b;
+    }
+
+    inline float i32max(int32_t _a, int32_t _b)
+    {
+        return _a > _b ? _a : _b;
+    }
+
     inline float fclamp(float _a, float _min, float _max)
     {
         return fmin(fmax(_a, _min), _max);

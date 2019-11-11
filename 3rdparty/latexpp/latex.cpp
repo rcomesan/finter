@@ -19,9 +19,6 @@ Latex::Latex(const std::string& stylesheet, WarningBehavior behavior)
 , _warning_behaviour(behavior)
 , _isolate(_new_isolate())
 {
-    // Ensure tmp folder exists.
-    CreateDirectory(Latex::tmp_folder_path().c_str(), NULL);
-
 	v8::HandleScope handle_scope(_isolate);
 	
 	v8::Isolate::Scope isolate_scope(_isolate);
@@ -73,18 +70,7 @@ std::string & Latex::exe_folder_path()
     return _p;
 }
 
-std::string& Latex::tmp_folder_path()
-{
-    static std::string _p;
-    if (_p.empty())
-    {
-        _p = Latex::exe_folder_path() + ".tmp" + "\\";
-    }
-
-    return _p;
-}
-
-std::string& Latex::tmp_file_path()
+std::string& Latex::tmp_html_path()
 {
     static std::string _p;
     if (_p.empty())
@@ -94,6 +80,18 @@ std::string& Latex::tmp_file_path()
 
     return _p;
 }
+
+std::string& Latex::tmp_png_path()
+{
+    static std::string _p;
+    if (_p.empty())
+    {
+        _p = Latex::exe_folder_path() + "tmp.png";
+    }
+
+    return _p;
+}
+
 
 void Latex::swap(Latex &other) noexcept
 {
@@ -179,7 +177,7 @@ void Latex::to_image(const std::string &latex,
 				  const std::string &filepath,
 				  ImageFormat format) const
 {
-    std::ofstream temp(Latex::tmp_file_path());
+    std::ofstream temp(Latex::tmp_html_path());
 	
 	if (! temp) throw FileException("Could not open temporary file!");
 	
@@ -196,7 +194,7 @@ void Latex::to_image(const std::string &latex,
 	
 	wkhtmltoimage_destroy_converter(converter);
 	
-	remove(Latex::tmp_file_path().c_str());
+	//remove(Latex::tmp_html_path().c_str());
 }
 
 void Latex::to_png(const std::string &latex,
@@ -371,7 +369,7 @@ Latex::_new_converter_settings(const std::string& filepath,
 	
 	wkhtmltoimage_set_global_setting(settings,
 									 "in",
-                                        Latex::tmp_file_path().c_str());
+                                        Latex::tmp_html_path().c_str());
 	
 	wkhtmltoimage_set_global_setting(settings,
 									 "out",

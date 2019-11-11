@@ -3,6 +3,7 @@
 
 #include <limits.h>
 #include <string.h>
+#include <inttypes.h>
 
 namespace finter
 {
@@ -67,7 +68,6 @@ namespace finter
 
     void Interpolation::recalculateLagrange()
     {
-        //TODO
     }
 
     void Interpolation::recalculateNewton(bool _progressive)
@@ -75,7 +75,7 @@ namespace finter
         //TODO
     }
 
-    float Lagrange::l(std::vector<ImVec2>& _d, uint32_t _i, float _x)
+    float Lagrange::lx(std::vector<ImVec2>& _d, uint32_t _i, float _x)
     {
         float dividend = 1;
         float divisor = 1;
@@ -99,10 +99,60 @@ namespace finter
 
         for (uint32_t i = 0; i < _d.size(); i++)
         {
-            r += _d[i].y * l(_d, i, _x);
+            r += _d[i].y * lx(_d, i, _x);
         }
 
         return r;
+    }
+
+    void Lagrange::latexPx(std::vector<ImVec2>& _d, std::string& _out)
+    {
+        static char buff[255];
+
+        _out = "P(x) = ";
+
+        for (uint32_t i = 0; i < _d.size(); i++)
+        {
+            snprintf(buff, sizeof(buff), "%s %.4g \\cdot L_{%" PRIu32 "}(x)", 
+                _d[i].y > 0 && i != 0 ? "+" : "",
+                _d[i].y, i);
+            _out.append(buff);
+        }
+    }
+
+    void Lagrange::latexLx(std::vector<ImVec2>& _d, uint32_t _i, std::string& _out)
+    {
+        static char buff[255];
+
+        static std::string tmp;
+        tmp.reserve(5000);
+        tmp = "{";
+
+        snprintf(buff, sizeof(buff), "L_{%" PRIu32 "}(x) = ", _i);
+        _out = std::string(buff);
+        _out.reserve(5000);
+        _out.append("{{");
+
+        for (uint32_t index = 0; index < _d.size(); index++)
+        {
+            if (index != _i)
+            {
+                snprintf(buff, sizeof(buff), "(x  %c %.4g)", 
+                    _d[index].x > 0 ? '-' : '+', 
+                    (_d[index].x > 0 ? 1 : -1) * _d[index].x);
+                _out.append(buff);
+
+                snprintf(buff, sizeof(buff), "(%.4g %c %.4g)", 
+                    _d[_i].x, _d[index].x > 0 ? '-' : '+', 
+                    (_d[index].x > 0 ? 1 : -1) * _d[index].x);
+                tmp.append(buff);
+            }
+        }
+
+        tmp.append("}");
+        _out.append("} \\above{1pt} ");
+        _out.append(tmp);
+        _out.append("}");
     }
 
     float Newton::eval(std::vector<ImVec2>& _d, float _x)

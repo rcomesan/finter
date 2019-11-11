@@ -21,9 +21,9 @@ class Latex
 {
 public:
 
-    static std::string& exe_folder_path();
-    static std::string& tmp_folder_path();
-    static std::string& tmp_file_path();
+    static std::string&     exe_folder_path();
+    static std::string&     tmp_html_path();
+    static std::string&     tmp_png_path();
 
 	/***********************************************************************//*!
 	*

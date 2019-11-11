@@ -10,39 +10,14 @@
 
 namespace finter
 {
-    /*
-    struct Polynomial
-    {
-        std::vector<float> coeffs;
-        
-        Polynomial()
-        {
-            coeffs.reserve(100);
-        }
-
-        inline uint32_t degree()
-        {
-            return coeffs.size() - 1;
-        }
-
-        inline float eval(float _x)
-        {
-            float im;
-            for (uint32_t i = 0; i < coeffs.size(); i++)
-            {
-                im += coeffs[i] * powf(_x, i);
-            }
-            return im;
-        }
-    };
-    */
-
     struct Lagrange
     {
         static float eval(std::vector<ImVec2>& _d, float _x);
+        static void  latexPx(std::vector<ImVec2>& _d, std::string& _out);
+        static void  latexLx(std::vector<ImVec2>& _d, uint32_t _i, std::string& _out);
 
     private:
-        static float l(std::vector<ImVec2>& _d, uint32_t _i, float _x);
+        static float lx(std::vector<ImVec2>& _d, uint32_t _i, float _x);
     };
 
     struct Newton
@@ -54,19 +29,6 @@ namespace finter
     {
         Interpolation();
         ~Interpolation();
-
-        /*
-        enum Type
-        {
-            None = 0,
-            Lagrange,
-            NewtonProgressive,
-            NewtonRegressive,
-            Count
-        };
-
-        Polynomial                  p[Interpolation::Type::Count];
-        */
 
         char                        name[INTERPOLATION_NAME_LEN];
         std::vector<ImVec2>         datapoints;
