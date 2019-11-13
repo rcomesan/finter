@@ -33,7 +33,6 @@ namespace finter
         goptNewtonRe = { false, ImVec4(0.0f, 1.0f, 0.0f, 1.0f) };
         goptAxes = { true, ImVec4(1.0f, 1.0f, 1.0f, 1.0f) };
         goptDatapoints = { true, ImVec4(1.0f, 0.0f, 1.0f, 1.0f) };
-        goptMousePoint = { true, ImVec4(1.0f, 1.0f, 0.0f, 1.0f) };
         goptCurPoint = { true, ImVec4(1.0f, 1.0f, 1.0f, 1.0f) };
 
         rangeMin = { -100, -100 };
@@ -97,8 +96,8 @@ namespace finter
                 {
                     curIntp = &interpolation;
                     Renderer::refreshGraphValues();
-                    Renderer::resetView();
                     Renderer::refreshLatexFormulas(false);
+                    Renderer::resetView();
                 }
                 ImGui::PopID();
             }
@@ -187,18 +186,27 @@ namespace finter
         ImGui::InvisibleButton("graph", ImVec2(MIDDLE_PANEL_WIDTH, GRAPH_HEIGHT));
 
         ImDrawList* dl = ImGui::GetOverlayDrawList();
-        
+
         if (goptAxes.visible)
             drawGraphAxes(dl, goptAxes.color);
 
         if (goptLagrange.visible)
-            drawGraphCurve(gdataLagrange.yS, rangeMin.y, rangeMax.y, goptLagrange.color, ImVec2(0.0f, GRAPH_HEIGHT));
-        
+        {
+            Renderer::drawGraphCurve(gdataLagrange.yS, rangeMin.y, rangeMax.y, goptLagrange.color, ImVec2(0.0f, GRAPH_HEIGHT));
+            Renderer::drawGraphPoint(dl, mousePointLagrange, false, goptLagrange.color);
+        }
+   
         if (goptNewtonPr.visible)
-            drawGraphCurve(gdataNewtonPr.yS, rangeMin.y, rangeMax.y, goptNewtonPr.color, ImVec2(0.0f, GRAPH_HEIGHT));
+        {
+            Renderer::drawGraphCurve(gdataNewtonPr.yS, rangeMin.y, rangeMax.y, goptNewtonPr.color, ImVec2(0.0f, GRAPH_HEIGHT));
+            Renderer::drawGraphPoint(dl, mousePointNewtonPr, false, goptNewtonPr.color);
+        }
 
-        if (goptNewtonPr.visible)
-            drawGraphCurve(gdataNewtonRe.yS, rangeMin.y, rangeMax.y, goptNewtonRe.color, ImVec2(0.0f, GRAPH_HEIGHT));
+        if (goptNewtonRe.visible)
+        {
+            Renderer::drawGraphCurve(gdataNewtonRe.yS, rangeMin.y, rangeMax.y, goptNewtonRe.color, ImVec2(0.0f, GRAPH_HEIGHT));
+            Renderer::drawGraphPoint(dl, mousePointNewtonRe, false, goptNewtonRe.color);
+        }
 
         if (goptDatapoints.visible)
         {
@@ -208,13 +216,21 @@ namespace finter
             }
         }
         if (goptCurPoint.visible) drawGraphPoint(dl, curPoint, false, goptCurPoint.color, true, 6.0f);
-        if (goptMousePoint.visible) drawGraphPoint(dl, mousePoint, false, goptMousePoint.color);
 
         if (ImGui::IsItemHovered())
         {
-            mousePoint.x = screenToPlaneSpaceX(ImGui::GetMousePos().x - graphPos.x);
-            mousePoint.y = curIntp->evalLagrange(mousePoint.x);
-            ImGui::SetTooltip("P(%.4f) = %.4f", mousePoint.x, mousePoint.y);
+            mousePointLagrange.x = screenToPlaneSpaceX(ImGui::GetMousePos().x - graphPos.x);
+            mousePointNewtonPr.x = mousePointLagrange.x;
+            mousePointNewtonRe.x = mousePointLagrange.x;
+
+            mousePointLagrange.y = curIntp->evalLagrange(mousePointLagrange.x);
+            mousePointNewtonPr.y = curIntp->evalNewtonPr(mousePointLagrange.x);
+            mousePointNewtonRe.y = curIntp->evalNewtonRe(mousePointLagrange.x);
+                
+            ImGui::SetTooltip(" L(%.4f) = %.4f\nNp(%.4f) = %.4f\nNr(%.4f) = %.4f",
+                mousePointLagrange.x, mousePointLagrange.y,
+                mousePointNewtonPr.x, mousePointNewtonPr.y,
+                mousePointNewtonRe.x, mousePointNewtonRe.y);
         }
         ImGui::Separator();
         ImGui::PopItemWidth();
@@ -253,8 +269,8 @@ namespace finter
 
         if (ImGui::DragFloatRange2("range for x", &rangeMin.x, &rangeMax.x))
         {
-            Renderer::resetView();
             Renderer::refreshGraphValues();
+            Renderer::resetView();
         }
         if (ImGui::DragFloatRange2("range for y", &rangeMin.y, &rangeMax.y))
         {
@@ -275,7 +291,6 @@ namespace finter
         drawOption("Axes", goptAxes);
         drawOption("Datapoints", goptDatapoints);
         drawOption("Current Point", goptCurPoint);
-        drawOption("Mouse Point", goptMousePoint);
         ImGui::EndGroup();
 
         ImGui::End();
@@ -406,7 +421,7 @@ namespace finter
 
         if (isModified)
         {
-            curIntp->recalculate();
+            curIntp->recalculateDiffs();
             curPoint.y = Lagrange::eval(curIntp->datapoints, curPoint.x);
             Renderer::refreshGraphValues();
             Renderer::refreshLatexFormulas(false);

@@ -59,68 +59,57 @@ namespace finter
         return true;
     }
 
-    void Interpolation::recalculate()
+    void Interpolation::recalculateDiffs()
     {
-        recalculateLagrange();
-        recalculateNewton(true);
-        recalculateNewton(false);
+        Newton::calculateDiffs(datapoints, diffs);
     }
 
-    void Interpolation::recalculateLagrange()
-    {
-    }
-
-    void Interpolation::recalculateNewton(bool _progressive)
-    {
-        //TODO
-    }
-
-    float Lagrange::lx(std::vector<ImVec2>& _d, uint32_t _i, float _x)
+    float Lagrange::lx(std::vector<ImVec2>& _dp, uint32_t _i, float _x)
     {
         float dividend = 1;
         float divisor = 1;
 
-        for (uint32_t index = 0; index < _d.size(); index++)
+        for (uint32_t index = 0; index < _dp.size(); index++)
         {
             if (index != _i)
             {
-                dividend *= (_x - _d[index].x);
-                divisor *= (_d[_i].x - _d[index].x);
+                dividend *= (_x - _dp[index].x);
+                divisor *= (_dp[_i].x - _dp[index].x);
             }
         }
         return dividend / divisor;
     }
 
-    float Lagrange::eval(std::vector<ImVec2>& _d, float _x)
+    float Lagrange::eval(std::vector<ImVec2>& _dp, float _x)
     {
-        if (0 == _d.size()) return 0.0f;
+        if (0 == _dp.size()) return 0.0f;
 
         float r = 0.0f;
 
-        for (uint32_t i = 0; i < _d.size(); i++)
+        for (uint32_t i = 0; i < _dp.size(); i++)
         {
-            r += _d[i].y * lx(_d, i, _x);
+            r += _dp[i].y * lx(_dp, i, _x);
         }
 
         return r;
     }
 
-    void Lagrange::latexPx(std::vector<ImVec2>& _d, std::string& _out)
+    void Lagrange::latexPx(std::vector<ImVec2>& _dp, std::string& _out)
     {
         static char buff[255];
 
         _out = "P(x) = ";
 
-        for (uint32_t i = 0; i < _d.size(); i++)
+        for (uint32_t i = 0; i < _dp.size(); i++)
         {
             snprintf(buff, sizeof(buff), "%s %.4g \\cdot L_{%" PRIu32 "}(x)", 
-                _d[i].y > 0 && i != 0 ? "+" : "",
-                _d[i].y, i);
+                _dp[i].y > 0 && i != 0 ? "+" : "",
+                _dp[i].y, i);
             _out.append(buff);
         }
     }
 
-    void Lagrange::latexLx(std::vector<ImVec2>& _d, uint32_t _i, std::string& _out)
+    void Lagrange::latexLx(std::vector<ImVec2>& _dp, uint32_t _i, std::string& _out)
     {
         static char buff[255];
 
@@ -133,18 +122,18 @@ namespace finter
         _out.reserve(5000);
         _out.append("{{");
 
-        for (uint32_t index = 0; index < _d.size(); index++)
+        for (uint32_t index = 0; index < _dp.size(); index++)
         {
             if (index != _i)
             {
                 snprintf(buff, sizeof(buff), "(x  %c %.4g)", 
-                    _d[index].x > 0 ? '-' : '+', 
-                    (_d[index].x > 0 ? 1 : -1) * _d[index].x);
+                    _dp[index].x > 0 ? '-' : '+', 
+                    (_dp[index].x > 0 ? 1 : -1) * _dp[index].x);
                 _out.append(buff);
 
                 snprintf(buff, sizeof(buff), "(%.4g %c %.4g)", 
-                    _d[_i].x, _d[index].x > 0 ? '-' : '+', 
-                    (_d[index].x > 0 ? 1 : -1) * _d[index].x);
+                    _dp[_i].x, _dp[index].x > 0 ? '-' : '+', 
+                    (_dp[index].x > 0 ? 1 : -1) * _dp[index].x);
                 tmp.append(buff);
             }
         }
@@ -155,11 +144,66 @@ namespace finter
         _out.append("}");
     }
 
-    float Newton::eval(std::vector<ImVec2>& _d, float _x)
+    float Newton::eval(std::vector<ImVec2>& _dp, float _x, bool _pro, std::vector<std::vector<float>>& _diffs)
     {
-        if (0 == _d.size()) return 0.0f;
-        //TODO
-        return 0.0f;
+        if (0 == _dp.size()) return 0.0f;
+        
+        float r = _dp[_pro ? 0 : _dp.size() - 1].y;
+        float prod;
+        
+        for (uint32_t i = 1; i < _diffs.size(); i++)
+        {
+            prod = 1.0f;
+            for (uint32_t j = 0; j <= i - 1; j++)
+            {
+                prod *= (_x - _dp[_pro ? j : _dp.size() - 1 - j].x);
+            }
+            
+            r += (_diffs[i][_pro ? 0 : _diffs[i].size() - 1] * prod);
+        }
+
+        return r;
+    }
+    
+    static float eval(std::vector<ImVec2>& _dp, float _x, bool _pro)
+    {
+        std::vector<std::vector<float>> diffs;
+        Newton::calculateDiffs(_dp, diffs);
+
+        return Newton::eval(_dp, _x, _pro, diffs);
+    }
+
+    void Newton::calculateDiffs(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _outDiffs)
+    {
+        _outDiffs.resize(_dp.size());
+
+        static std::vector<float>  datapointsYs;
+        datapointsYs.resize(_dp.size());
+        for (uint32_t i = 0; i < _dp.size(); i++)
+        {
+            datapointsYs[i] = _dp[i].y;
+        }
+
+        std::vector<float>& prevOrderYs = datapointsYs;
+        uint32_t n = 1;
+
+        while (prevOrderYs.size() > 1)
+        {
+            // order "n" differences
+            std::vector<float>& d = _outDiffs[n];
+
+            // calculate f[x[i], ..., x(i+n)]
+            d.resize(prevOrderYs.size() - 1);
+            for (uint32_t i = 0; i < prevOrderYs.size() - 1; i++)
+            {
+                d[i] = (prevOrderYs[i + 1] - prevOrderYs[i]) / (_dp[i + n].x - _dp[i].x);
+            }
+
+            prevOrderYs = d;
+            n++;
+        }
+
+        _outDiffs.resize(n - 1); // we get rid of the last difference since it will always be zero.
     }
 
     Interpolator::Interpolator()
@@ -177,6 +221,7 @@ namespace finter
         container.push_back(_interpolation); // <-- this involves a copy
 
         Interpolation& newIntp = container.back();
+        newIntp.recalculateDiffs();
 
         if (0 == strlen(newIntp.name))
             snprintf(newIntp.name, INTERPOLATION_NAME_LEN, "interpolation at 0x%p", (void*)&newIntp);
