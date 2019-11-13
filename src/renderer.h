@@ -94,6 +94,7 @@ namespace finter
         // methods
         void                        refreshGraphValues(uint32_t _steps = 1000);
         void                        refreshLatexFormulas(bool _steps);
+        void                        resetView();
 
         // functions for converting from/to plane and screen coordinate spaces
         inline float                planeToScreenSpaceX(float _v) { return fmap(_v, rangeMin.x, rangeMax.x, 0, graphSize.x - 1, false) + 1; };
@@ -117,11 +118,10 @@ namespace finter
         void                        drawOption(const char* _label, GraphOption& _opt);
         void                        drawLatex(const char* _latex);
         
-        bool                        loadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height);
-
         // imgui helpers
-        static void                 PushDisabled();
-        static void                 PopDisabled();
+        static void                 pushDisabled();
+        static void                 popDisabled();
+        bool                        loadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height);
     };
 }
 

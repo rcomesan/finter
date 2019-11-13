@@ -96,7 +96,9 @@ namespace finter
                 if (ImGui::Selectable(interpolation.name, &selected))
                 {
                     curIntp = &interpolation;
-                    refreshGraphValues();
+                    Renderer::refreshGraphValues();
+                    Renderer::resetView();
+                    Renderer::refreshLatexFormulas(false);
                 }
                 ImGui::PopID();
             }
@@ -125,7 +127,7 @@ namespace finter
 
                     Renderer::drawLatex(latexLagrange.px.c_str());
                     
-                    if (ImGui::Button("Show Step-by-Step Solution", ImVec2(ImGui::GetContentRegionAvailWidth(), 40.0f)))
+                    if (ImGui::Button("Show Step-by-Step Solution", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f)))
                     {
                         stepByStepOpened = true;
                         Renderer::refreshLatexFormulas(true);
@@ -163,8 +165,6 @@ namespace finter
 
     void Renderer::drawPanelMiddle()
     {
-        refreshGraphValues(); //TODO optimize/remove this
-
         if (curIntp == nullptr) return;
 
         ImGuiWindowFlags wflags = ImGuiWindowFlags_None
@@ -239,13 +239,11 @@ namespace finter
         ImGui::Begin("Options", nullptr, wflags);
 
         ImGui::PushItemWidth(0.6 * BOTTOM_PANEL_WIDTH);
-        if (NULL == curIntp) Renderer::PushDisabled();
+        if (NULL == curIntp) Renderer::pushDisabled();
         ImGui::BeginGroup();
         if (ImGui::Button("Reset View"))
         {
-            rangeMin.y = fmin(fmin(gdataLagrange.min, gdataNewtonPr.min), gdataNewtonRe.min);
-            rangeMax.y = fmax(fmax(gdataLagrange.max, gdataNewtonPr.max), gdataNewtonRe.max);
-            refreshGraphValues();
+            Renderer::resetView();
         }
         ImGui::SameLine();
         if (ImGui::Button("asd"))
@@ -255,15 +253,16 @@ namespace finter
 
         if (ImGui::DragFloatRange2("range for x", &rangeMin.x, &rangeMax.x))
         {
-            refreshGraphValues();
+            Renderer::resetView();
+            Renderer::refreshGraphValues();
         }
         if (ImGui::DragFloatRange2("range for y", &rangeMin.y, &rangeMax.y))
         {
-            refreshGraphValues();
+            Renderer::refreshGraphValues();
         }
         
         ImGui::EndGroup();
-        if (NULL == curIntp) Renderer::PopDisabled();
+        if (NULL == curIntp) Renderer::popDisabled();
         ImGui::PopItemWidth();
 
         ImGui::SameLine(0.0f, 125.0f);
@@ -409,7 +408,9 @@ namespace finter
         {
             curIntp->recalculate();
             curPoint.y = Lagrange::eval(curIntp->datapoints, curPoint.x);
-            refreshLatexFormulas(false);
+            Renderer::refreshGraphValues();
+            Renderer::refreshLatexFormulas(false);
+            Renderer::resetView();
         }
     }
 
@@ -608,16 +609,23 @@ namespace finter
         return true;
     }
 
-    void Renderer::PushDisabled()
+    void Renderer::pushDisabled()
     {
         ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.35);
         ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
     }
 
-    void Renderer::PopDisabled()
+    void Renderer::popDisabled()
     {
         ImGui::PopStyleVar();
         ImGui::PopItemFlag();
+    }
+
+    void Renderer::resetView()
+    {
+        rangeMin.y = fmin(fmin(gdataLagrange.min, gdataNewtonPr.min), gdataNewtonRe.min);
+        rangeMax.y = fmax(fmax(gdataLagrange.max, gdataNewtonPr.max), gdataNewtonRe.max);
+        refreshGraphValues();
     }
 
     void Renderer::refreshGraphValues(uint32_t _steps)
