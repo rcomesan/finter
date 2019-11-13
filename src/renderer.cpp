@@ -29,8 +29,8 @@ namespace finter
         s.TabRounding = 0;
 
         goptLagrange = { true, ImVec4(1.0f, 1.0f, 0.0f, 1.0f) };
-        goptNewtonPr = { false , ImVec4(0.0f, 1.0f, 1.0f, 1.0f) };
-        goptNewtonRe = { false, ImVec4(0.0f, 1.0f, 0.0f, 1.0f) };
+        goptNewtonPr = { true , ImVec4(0.0f, 1.0f, 1.0f, 1.0f) };
+        goptNewtonRe = { true, ImVec4(0.0f, 1.0f, 0.0f, 1.0f) };
         goptAxes = { true, ImVec4(1.0f, 1.0f, 1.0f, 1.0f) };
         goptDatapoints = { true, ImVec4(1.0f, 0.0f, 1.0f, 1.0f) };
         goptCurPoint = { true, ImVec4(1.0f, 1.0f, 1.0f, 1.0f) };
@@ -108,7 +108,6 @@ namespace finter
 
         if (nullptr != curIntp)
         {
-            ImGui::Text("Selected Interpolation:");
             ImGui::InputText("Name", curIntp->name, sizeof(curIntp->name));
             drawListboxDataPoints(curIntp->datapoints, &curIntp->datapointSelected);
 
@@ -118,37 +117,19 @@ namespace finter
 
             if (ImGui::BeginTabBar("Polynomials", ImGuiTabBarFlags_None))
             {
-                name = "Lagrange";
-                if (ImGui::BeginTabItem(name))
+                if (Renderer::drawTab("Lagrange", latexLagrange))
                 {
-                    int32_t degree = i32max(0, curIntp->datapoints.size() - 1);
-                    ImGui::Text("Polynomial of Degree %" PRId32, degree);
-
-                    Renderer::drawLatex(latexLagrange.px.c_str());
-                    
-                    if (ImGui::Button("Show Step-by-Step Solution", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f)))
-                    {
-                        stepByStepOpened = true;
-                        Renderer::refreshLatexFormulas(true);
-                        ImGui::OpenPopup("Step-by-Step Solution");
-                    }
-                    drawPopupStepByStepSolution(name, latexLagrange);
-                    
-                    ImGui::Separator();
-
-                    ImGui::Text("Evaluate");
-                    if (ImGui::SliderFloat("Input", &curPoint.x, -100.0f, 100.0f, "P(%.4f)"))
-                        curPoint.y = Lagrange::eval(curIntp->datapoints, curPoint.x);
-                    ImGui::DragFloat("Output", &curPoint.y, 0.0f, 0.0f, 0.0f, "%.4f", 0.0f);
-                    ImGui::Separator();
-
-                    ImGui::EndTabItem();
+                    curPoint.y = curIntp->evalLagrange(curPoint.x);
                 }
 
-                if (ImGui::BeginTabItem("Newton-Gregory"))
+                if (Renderer::drawTab("Newton Pr", latexNewtonPr))
                 {
-                    ImGui::Text("This is the Newton-Gregory tab!\nblah blah blah blah blah");
-                    ImGui::EndTabItem();
+                    curPoint.y = curIntp->evalNewtonPr(curPoint.x);
+                }
+                
+                if (Renderer::drawTab("Newton Re", latexNewtonRe))
+                {
+                    curPoint.y = curIntp->evalNewtonRe(curPoint.x);
                 }
 
                 ImGui::EndTabBar();
@@ -261,11 +242,6 @@ namespace finter
         {
             Renderer::resetView();
         }
-        ImGui::SameLine();
-        if (ImGui::Button("asd"))
-        {
-
-        }
 
         if (ImGui::DragFloatRange2("range for x", &rangeMin.x, &rangeMax.x))
         {
@@ -294,6 +270,41 @@ namespace finter
         ImGui::EndGroup();
 
         ImGui::End();
+    }
+
+    bool Renderer::drawTab(const char* _name, LatexData& _latex)
+    {
+        bool active = false;
+
+        if (ImGui::BeginTabItem(_name))
+        {
+            ImGui::SetWindowFontScale(1.0f);
+
+            int32_t degree = i32max(0, curIntp->datapoints.size() - 1);
+            ImGui::Text("Polynomial of Degree %" PRId32, degree);
+
+            Renderer::drawLatex(_latex.px.c_str());
+
+            if (ImGui::Button("Show Step-by-Step Solution", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f)))
+            {
+                stepByStepOpened = true;
+                Renderer::refreshLatexFormulas(true);
+                ImGui::OpenPopup("Step-by-Step Solution");
+            }
+            drawPopupStepByStepSolution(_name, _latex);
+
+            ImGui::Separator();
+
+            ImGui::Text("Evaluate");
+            active = ImGui::SliderFloat("Input", &curPoint.x, rangeMin.x, rangeMax.x, "P(%.4f)");
+            ImGui::DragFloat("Output", &curPoint.y, 0.0f, 0.0f, 0.0f, "%.4f", 0.0f);
+            ImGui::Separator();
+
+            ImGui::EndTabItem();
+        }
+        active = active | ImGui::IsItemActivated();
+
+        return active;
     }
 
     void Renderer::drawPopupNewInterpolation()
@@ -376,6 +387,21 @@ namespace finter
         bool isSelected = false;     // true if a given list item is currently selected
         bool isModified = false;     // true if our dataset was modified and a recalculation is needed
 
+        if (ImGui::ListBoxHeader("Datapoints"))
+        {
+            for (auto it = _data.begin(); it != _data.end(); ++it)
+            {
+                isSelected = &(*it) == (*_pointSelected);
+                isModified = drawListitemPoint(*it, &isSelected) || isModified;
+
+                if (isSelected)
+                {
+                    (*_pointSelected) = &(*it);
+                }
+            }
+            ImGui::ListBoxFooter();
+        }
+
         if (ImGui::Button("Clear"))
         {
             isModified = true;
@@ -397,26 +423,11 @@ namespace finter
             _data.emplace_back(0.0f, 0.0f);
         }
         ImGui::SameLine();
-        if(ImGui::Button("Add Rnd"))
+        if (ImGui::Button("Add Rnd"))
         {
             isModified = true;
             static uint32_t rgX = (uint32_t)(abs(rangeMax.x - rangeMin.x));
-            _data.emplace_back(rangeMin.x + rand() % rgX, rangeMin.x + rand() % rgX);               
-        }
-
-        if (ImGui::ListBoxHeader("Datapoints"))
-        {
-            for (auto it = _data.begin(); it != _data.end(); ++it)
-            {
-                isSelected = &(*it) == (*_pointSelected);
-                isModified = drawListitemPoint(*it, &isSelected) || isModified;
-
-                if (isSelected)
-                {
-                    (*_pointSelected) = &(*it);
-                }
-            }
-            ImGui::ListBoxFooter();
+            _data.emplace_back(rangeMin.x + rand() % rgX, rangeMin.x + rand() % rgX);
         }
 
         if (isModified)

@@ -113,6 +113,7 @@ namespace finter
         void                        drawPanelLeft();
         void                        drawPanelMiddle();
         void                        drawPanelBottom();
+        bool                        drawTab(const char* _name, LatexData& _latex);
         void                        drawGraphAxes(ImDrawList* _dl, const ImVec4& _color);
         void                        drawGraphPoint(ImDrawList * _dl, ImVec2& _p, bool _isSelected, ImVec4& _color, bool _square = false, float _radius = 4.0f);
         void                        drawGraphCurve(std::vector<float>& _yValues, float _yMin, float _yMax, const ImVec4& _color, const ImVec2& _size);

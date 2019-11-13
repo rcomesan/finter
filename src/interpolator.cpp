@@ -165,7 +165,7 @@ namespace finter
         return r;
     }
     
-    static float eval(std::vector<ImVec2>& _dp, float _x, bool _pro)
+    float eval(std::vector<ImVec2>& _dp, float _x, bool _pro)
     {
         std::vector<std::vector<float>> diffs;
         Newton::calculateDiffs(_dp, diffs);
