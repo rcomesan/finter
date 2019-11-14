@@ -162,11 +162,11 @@ namespace finter
         _out.append("}");
     }
 
-    float Newton::eval(std::vector<ImVec2>& _dp, float _x, bool _pro, std::vector<std::vector<float>>& _diffs)
+    float Newton::eval(std::vector<ImVec2>& _dp, float _x, bool _fwd, std::vector<std::vector<float>>& _diffs)
     {
         if (0 == _dp.size()) return 0.0f;
 
-        float r = _dp[_pro ? 0 : _dp.size() - 1].y;
+        float r = _dp[_fwd ? 0 : _dp.size() - 1].y;
         float prod;
 
         for (uint32_t i = 1; i < _diffs.size(); i++)
@@ -174,30 +174,30 @@ namespace finter
             prod = 1.0f;
             for (uint32_t j = 0; j <= i - 1; j++)
             {
-                prod *= (_x - _dp[_pro ? j : _dp.size() - 1 - j].x);
+                prod *= (_x - _dp[_fwd ? j : _dp.size() - 1 - j].x);
             }
 
-            r += (_diffs[i][_pro ? 0 : _diffs[i].size() - 1] * prod);
+            r += (_diffs[i][_fwd ? 0 : _diffs[i].size() - 1] * prod);
         }
 
         return r;
     }
 
-    float Newton::eval(std::vector<ImVec2>& _dp, float _x, bool _pro)
+    float Newton::eval(std::vector<ImVec2>& _dp, float _x, bool _fwd)
     {
         std::vector<std::vector<float>> diffs;
         Newton::calculateDiffs(_dp, diffs);
 
-        return Newton::eval(_dp, _x, _pro, diffs);
+        return Newton::eval(_dp, _x, _fwd, diffs);
     }
 
-    void Newton::latexFormula(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _pro, std::string& _out)
+    void Newton::latexFormula(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _fwd, std::string& _out)
     {
         static char buff[255];
 
         _out.reserve(2500);
 
-        snprintf(buff, sizeof(buff), "P(x)=f_%" PRIu32, _pro ? 0 : _dp.size() - 1);
+        snprintf(buff, sizeof(buff), "P(x)=f_%" PRIu32, _fwd ? 0 : _dp.size() - 1);
         _out = std::string(buff);
 
         for (uint32_t i = 1; i < _diffs.size(); i++)
@@ -212,40 +212,40 @@ namespace finter
 
             for (uint32_t j = 0; j <= i - 1; j++)
             {
-                snprintf(buff, sizeof(buff), " (x - x_%" PRIu32 ")", _pro ? j : _dp.size() - 1 - j);
+                snprintf(buff, sizeof(buff), " (x - x_%" PRIu32 ")", _fwd ? j : _dp.size() - 1 - j);
                 _out.append(buff);
             }
         }
     }
 
-    void Newton::latexPx(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _pro, std::string& _out)
+    void Newton::latexPx(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _fwd, std::string& _out)
     {
         static char  buff[255];
         static float v;
         static char  s;
 
-        snprintf(buff, sizeof(buff), "P(x)=%.4g", _pro ? _dp[0].y : _dp[_dp.size() - 1].y);
+        snprintf(buff, sizeof(buff), "P(x)=%.4g", _fwd ? _dp[0].y : _dp[_dp.size() - 1].y);
 
         _out.reserve(2500);
         _out = std::string(buff);
 
         for (uint32_t i = 1; i < _diffs.size(); i++)
         {
-            simplifySigns(true, _diffs[i][_pro ? 0 : _diffs[i].size() - 1], s, v);
+            simplifySigns(true, _diffs[i][_fwd ? 0 : _diffs[i].size() - 1], s, v);
             snprintf(buff, sizeof(buff), " %c %.4g \\cdot", s, v);
             _out.append(buff);
 
 
             for (uint32_t j = 0; j <= i - 1; j++)
             {
-                simplifySigns(false, _dp[_pro ? j : _dp.size() - 1 - j].x, s, v);
+                simplifySigns(false, _dp[_fwd ? j : _dp.size() - 1 - j].x, s, v);
                 snprintf(buff, sizeof(buff), " (x %c %.4g)", s, v);
                 _out.append(buff);
             }
         }
     }
 
-    void Newton::latexFx(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _pro, uint32_t _from, uint32_t _to, std::string& _out)
+    void Newton::latexFx(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _fwd, uint32_t _from, uint32_t _to, std::string& _out)
     {
         static char buff[255];
 

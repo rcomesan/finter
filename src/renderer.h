@@ -66,23 +66,23 @@ namespace finter
         ImVec2                      rangeMax;
 
         GraphData                   gdataLagrange;              // cached graph data for drawing lagrange poylnomial in the graph.
-        GraphData                   gdataNewtonPr;              // cached graph data for drawing newton progressive poylnomial.
-        GraphData                   gdataNewtonRe;              // cached graph data for drawing newton rggressive polynomial .
+        GraphData                   gdataNewtonFwd;             // cached graph data for drawing newton forward poylnomial.
+        GraphData                   gdataNewtonBwd;             // cached graph data for drawing newton backward polynomial .
 
         GraphOption                 goptLagrange;               // graph options for drawing lagrange polynomial curve.
-        GraphOption                 goptNewtonPr;               // graph options for drawing newton progressive polynomial curve.
-        GraphOption                 goptNewtonRe;               // graph options for drawing newton regressive polynomial curve.
+        GraphOption                 goptNewtonFwd;              // graph options for drawing newton forward polynomial curve.
+        GraphOption                 goptNewtonBwd;              // graph options for drawing newton backward polynomial curve.
         GraphOption                 goptAxes;                   // graph options for drawing graph axes.
         GraphOption                 goptDatapoints;             // graph options for drawing initial data points.
         GraphOption                 goptCurPoint;               // graph options for drawing the current point being evaluated on the left panel.
 
         LatexData                   latexLagrange;              // latex data for drawing math formulas for lagrange polynomial.
-        LatexData                   latexNewtonPr;              // latex data for drawing math formulas for newton progressive polynomial.
-        LatexData                   latexNewtonRe;              // latex data for drawing math formulas for newton regressive polynomial.
+        LatexData                   latexNewtonFwd;             // latex data for drawing math formulas for newton forward polynomial.
+        LatexData                   latexNewtonBwd;             // latex data for drawing math formulas for newton backward polynomial.
 
         ImVec2                      mousePointLagrange;         // current point being hovered (in plane space).
-        ImVec2                      mousePointNewtonPr;         // current point being hovered (in plane space).
-        ImVec2                      mousePointNewtonRe;         // current point being hovered (in plane space).
+        ImVec2                      mousePointNewtonFwd;        // current point being hovered (in plane space).
+        ImVec2                      mousePointNewtonBwd;        // current point being hovered (in plane space).
 
         bool                        stepByStepOpened;
 

@@ -14,8 +14,8 @@ namespace finter
     {
         Interpolation_None,
         Interpolation_Lagrange,
-        Interpolation_NewtonPr,
-        Interpolation_NewtonRe,
+        Interpolation_NewtonFwd,
+        Interpolation_NewtonBwd,
     };
 
     struct Lagrange
@@ -31,11 +31,11 @@ namespace finter
 
     struct Newton
     {
-        static float eval(std::vector<ImVec2>& _dp, float _x, bool _pro, std::vector<std::vector<float>>& _diffs);
-        static float eval(std::vector<ImVec2>& _dp, float _x, bool _pro);
-        static void  latexFormula(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _pro, std::string& _out);
-        static void  latexPx(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _pro, std::string& _out);
-        static void  latexFx(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _pro, uint32_t _from, uint32_t _to, std::string& _out);
+        static float eval(std::vector<ImVec2>& _dp, float _x, bool _fwd, std::vector<std::vector<float>>& _diffs);
+        static float eval(std::vector<ImVec2>& _dp, float _x, bool _fwd);
+        static void  latexFormula(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _fwd, std::string& _out);
+        static void  latexPx(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _fwd, std::string& _out);
+        static void  latexFx(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _fwd, uint32_t _from, uint32_t _to, std::string& _out);
         static void  calculateDiffs(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _outDiffs);
 
     private:
@@ -56,8 +56,8 @@ namespace finter
         static bool                     parseData(const char* _inBuff, std::vector<ImVec2>& _outData);
 
         inline float                    evalLagrange(float _x) { return Lagrange::eval(datapoints, _x); }
-        inline float                    evalNewtonPr(float _x) { return Newton::eval(datapoints, _x, true, diffs); }
-        inline float                    evalNewtonRe(float _x) { return Newton::eval(datapoints, _x, false, diffs); }
+        inline float                    evalNewtonFwd(float _x) { return Newton::eval(datapoints, _x, true, diffs); }
+        inline float                    evalNewtonBwd(float _x) { return Newton::eval(datapoints, _x, false, diffs); }
 
         void                            recalculateDiffs();        
     };

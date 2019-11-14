@@ -29,8 +29,8 @@ namespace finter
         s.TabRounding = 0;
 
         goptLagrange = { true, ImVec4(1.0f, 1.0f, 0.0f, 1.0f) };
-        goptNewtonPr = { true , ImVec4(0.0f, 1.0f, 1.0f, 1.0f) };
-        goptNewtonRe = { true, ImVec4(0.0f, 1.0f, 0.0f, 1.0f) };
+        goptNewtonFwd = { true , ImVec4(0.0f, 1.0f, 1.0f, 1.0f) };
+        goptNewtonBwd = { true, ImVec4(0.0f, 1.0f, 0.0f, 1.0f) };
         goptAxes = { true, ImVec4(1.0f, 1.0f, 1.0f, 1.0f) };
         goptDatapoints = { true, ImVec4(1.0f, 0.0f, 1.0f, 1.0f) };
         goptCurPoint = { true, ImVec4(1.0f, 1.0f, 1.0f, 1.0f) };
@@ -40,8 +40,8 @@ namespace finter
         curVariant = Interpolation_Lagrange;
 
         latexLagrange.steps.reserve(MAX_DATAPOINTS);
-        latexNewtonPr.steps.reserve(MAX_DATAPOINTS);
-        latexNewtonRe.steps.reserve(MAX_DATAPOINTS);
+        latexNewtonFwd.steps.reserve(MAX_DATAPOINTS);
+        latexNewtonBwd.steps.reserve(MAX_DATAPOINTS);
     }
 
     Renderer::~Renderer()
@@ -123,18 +123,18 @@ namespace finter
                     curPoint.y = curIntp->evalLagrange(curPoint.x);
                 }
 
-                if (Renderer::drawTab("Newton Progressive", latexNewtonPr))
+                if (Renderer::drawTab("Newton Forward", latexNewtonFwd))
                 {
                     tabChanged = true;
-                    curVariant = Interpolation_NewtonPr;
-                    curPoint.y = curIntp->evalNewtonPr(curPoint.x);
+                    curVariant = Interpolation_NewtonFwd;
+                    curPoint.y = curIntp->evalNewtonFwd(curPoint.x);
                 }
                 
-                if (Renderer::drawTab("Newton Regressive", latexNewtonRe))
+                if (Renderer::drawTab("Newton Backward", latexNewtonBwd))
                 {
                     tabChanged = true;
-                    curVariant = Interpolation_NewtonRe;
-                    curPoint.y = curIntp->evalNewtonRe(curPoint.x);
+                    curVariant = Interpolation_NewtonBwd;
+                    curPoint.y = curIntp->evalNewtonBwd(curPoint.x);
                 }
 
                 if (tabChanged)
@@ -194,16 +194,16 @@ namespace finter
             Renderer::drawGraphPoint(dl, mousePointLagrange, false, goptLagrange.color);
         }
    
-        if (goptNewtonPr.visible)
+        if (goptNewtonFwd.visible)
         {
-            Renderer::drawGraphCurve(gdataNewtonPr.yS, rangeMin.y, rangeMax.y, goptNewtonPr.color, ImVec2(w, GRAPH_HEIGHT));
-            Renderer::drawGraphPoint(dl, mousePointNewtonPr, false, goptNewtonPr.color);
+            Renderer::drawGraphCurve(gdataNewtonFwd.yS, rangeMin.y, rangeMax.y, goptNewtonFwd.color, ImVec2(w, GRAPH_HEIGHT));
+            Renderer::drawGraphPoint(dl, mousePointNewtonFwd, false, goptNewtonFwd.color);
         }
 
-        if (goptNewtonRe.visible)
+        if (goptNewtonBwd.visible)
         {
-            Renderer::drawGraphCurve(gdataNewtonRe.yS, rangeMin.y, rangeMax.y, goptNewtonRe.color, ImVec2(w, GRAPH_HEIGHT));
-            Renderer::drawGraphPoint(dl, mousePointNewtonRe, false, goptNewtonRe.color);
+            Renderer::drawGraphCurve(gdataNewtonBwd.yS, rangeMin.y, rangeMax.y, goptNewtonBwd.color, ImVec2(w, GRAPH_HEIGHT));
+            Renderer::drawGraphPoint(dl, mousePointNewtonBwd, false, goptNewtonBwd.color);
         }
 
         if (goptDatapoints.visible)
@@ -218,17 +218,17 @@ namespace finter
         if (ImGui::IsItemHovered())
         {
             mousePointLagrange.x = screenToPlaneSpaceX(ImGui::GetMousePos().x - graphPos.x);
-            mousePointNewtonPr.x = mousePointLagrange.x;
-            mousePointNewtonRe.x = mousePointLagrange.x;
+            mousePointNewtonFwd.x = mousePointLagrange.x;
+            mousePointNewtonBwd.x = mousePointLagrange.x;
 
             mousePointLagrange.y = curIntp->evalLagrange(mousePointLagrange.x);
-            mousePointNewtonPr.y = curIntp->evalNewtonPr(mousePointLagrange.x);
-            mousePointNewtonRe.y = curIntp->evalNewtonRe(mousePointLagrange.x);
+            mousePointNewtonFwd.y = curIntp->evalNewtonFwd(mousePointLagrange.x);
+            mousePointNewtonBwd.y = curIntp->evalNewtonBwd(mousePointLagrange.x);
                 
             ImGui::SetTooltip(" L(%.4f) = %.4f\nNp(%.4f) = %.4f\nNr(%.4f) = %.4f",
                 mousePointLagrange.x, mousePointLagrange.y,
-                mousePointNewtonPr.x, mousePointNewtonPr.y,
-                mousePointNewtonRe.x, mousePointNewtonRe.y);
+                mousePointNewtonFwd.x, mousePointNewtonFwd.y,
+                mousePointNewtonBwd.x, mousePointNewtonBwd.y);
         }
         ImGui::EndChild();
         ImGui::PopItemWidth();
@@ -280,8 +280,8 @@ namespace finter
 
         ImGui::BeginGroup();
         drawOption("Lagrange", goptLagrange);
-        drawOption("Newton Pr", goptNewtonPr);
-        drawOption("Newton Re", goptNewtonRe);
+        drawOption("Newton Pr", goptNewtonFwd);
+        drawOption("Newton Re", goptNewtonBwd);
         ImGui::Separator();
         drawOption("Axes", goptAxes);
         drawOption("Datapoints", goptDatapoints);
@@ -479,7 +479,7 @@ namespace finter
 
             modified = false
                 || ImGui::SliderFloat("x", &_p.x, rangeMin.x, rangeMax.x, "%.4f")
-                || ImGui::InputFloat("f(x)", &_p.y, 0.5f, 1.0f, 0);
+                || ImGui::InputFloat("f(x)", &_p.y, 1.0f, 5.0f, 0);
 
             ImGui::EndPopup();
         }
@@ -670,8 +670,8 @@ namespace finter
 
     void Renderer::resetView()
     {
-        rangeMin.y = fmin(fmin(gdataLagrange.min, gdataNewtonPr.min), gdataNewtonRe.min);
-        rangeMax.y = fmax(fmax(gdataLagrange.max, gdataNewtonPr.max), gdataNewtonRe.max);
+        rangeMin.y = fmin(fmin(gdataLagrange.min, gdataNewtonFwd.min), gdataNewtonBwd.min);
+        rangeMax.y = fmax(fmax(gdataLagrange.max, gdataNewtonFwd.max), gdataNewtonBwd.max);
         refreshGraphValues();
     }
 
@@ -704,15 +704,15 @@ namespace finter
         gdataLagrange.min = FLT_MAX;
         gdataLagrange.max = 0;
 
-        gdataNewtonPr.yS.clear();
-        gdataNewtonPr.yS.reserve(_steps);
-        gdataNewtonPr.min = FLT_MAX;
-        gdataNewtonPr.max = 0;
+        gdataNewtonFwd.yS.clear();
+        gdataNewtonFwd.yS.reserve(_steps);
+        gdataNewtonFwd.min = FLT_MAX;
+        gdataNewtonFwd.max = 0;
 
-        gdataNewtonRe.yS.clear();
-        gdataNewtonRe.yS.reserve(_steps);
-        gdataNewtonRe.min = FLT_MAX;
-        gdataNewtonRe.max = 0;
+        gdataNewtonBwd.yS.clear();
+        gdataNewtonBwd.yS.reserve(_steps);
+        gdataNewtonBwd.min = FLT_MAX;
+        gdataNewtonBwd.max = 0;
 
         for (int32_t i = 0; i < _steps; i++)
         {
@@ -721,15 +721,15 @@ namespace finter
             gdataLagrange.max = fmax(gdataLagrange.max, y);
             gdataLagrange.yS.push_back(y);
 
-            y = curIntp->evalNewtonPr(x);
-            gdataNewtonPr.min = fmin(gdataNewtonPr.min, y);
-            gdataNewtonPr.max = fmax(gdataNewtonPr.max, y);
-            gdataNewtonPr.yS.push_back(y);
+            y = curIntp->evalNewtonFwd(x);
+            gdataNewtonFwd.min = fmin(gdataNewtonFwd.min, y);
+            gdataNewtonFwd.max = fmax(gdataNewtonFwd.max, y);
+            gdataNewtonFwd.yS.push_back(y);
 
-            y = curIntp->evalNewtonRe(x);
-            gdataNewtonRe.min = fmin(gdataNewtonRe.min, y);
-            gdataNewtonRe.max = fmax(gdataNewtonRe.max, y);
-            gdataNewtonRe.yS.push_back(y);
+            y = curIntp->evalNewtonBwd(x);
+            gdataNewtonBwd.min = fmin(gdataNewtonBwd.min, y);
+            gdataNewtonBwd.max = fmax(gdataNewtonBwd.max, y);
+            gdataNewtonBwd.yS.push_back(y);
 
             x += increment;
         }
@@ -739,8 +739,8 @@ namespace finter
     {
         uint32_t s = 0;
 
-        bool newtonPro = Interpolation_NewtonPr == _variant;
-        LatexData& _dataNw = newtonPro ? latexNewtonPr : latexNewtonRe;
+        bool newtonFwd = Interpolation_NewtonFwd == _variant;
+        LatexData& _dataNw = newtonFwd ? latexNewtonFwd : latexNewtonBwd;
 
         if (_steps)
         {
@@ -758,14 +758,14 @@ namespace finter
             else
             {
                 _dataNw.steps.resize(500);
-                Newton::latexFormula(curIntp->datapoints, curIntp->diffs, newtonPro, _dataNw.steps[0]);
+                Newton::latexFormula(curIntp->datapoints, curIntp->diffs, newtonFwd, _dataNw.steps[0]);
 
                 s = 1;
                 for (uint32_t diffOrder = 1; diffOrder < curIntp->diffs.size(); diffOrder++)
                 {
                     for (uint32_t diffIndex = 0; diffIndex < curIntp->diffs[diffOrder].size(); diffIndex++)
                     {
-                        Newton::latexFx(curIntp->datapoints, curIntp->diffs, newtonPro, diffIndex, diffIndex + diffOrder, _dataNw.steps[s++]);
+                        Newton::latexFx(curIntp->datapoints, curIntp->diffs, newtonFwd, diffIndex, diffIndex + diffOrder, _dataNw.steps[s++]);
                     }
                 }
                 _dataNw.steps.resize(s);
@@ -779,7 +779,7 @@ namespace finter
             }
             else
             {
-                Newton::latexPx(curIntp->datapoints, curIntp->diffs, newtonPro, _dataNw.px);
+                Newton::latexPx(curIntp->datapoints, curIntp->diffs, newtonFwd, _dataNw.px);
             }
         }
     }
