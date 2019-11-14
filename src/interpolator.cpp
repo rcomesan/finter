@@ -300,7 +300,7 @@ namespace finter
             order++;
         }
 
-        _outDiffs.resize(order - 1); // we get rid of the last difference since it will always be zero.
+        _outDiffs.resize(order);
     }
 
     float Newton::getY(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, uint32_t _order, uint32_t _index)
