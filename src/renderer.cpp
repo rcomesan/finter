@@ -225,7 +225,7 @@ namespace finter
             mousePointNewtonFwd.y = curIntp->evalNewtonFwd(mousePointLagrange.x);
             mousePointNewtonBwd.y = curIntp->evalNewtonBwd(mousePointLagrange.x);
                 
-            ImGui::SetTooltip(" L(%.4f) = %.4f\nNp(%.4f) = %.4f\nNr(%.4f) = %.4f",
+            ImGui::SetTooltip(" L(%.4f) = %.4f\nNf(%.4f) = %.4f\nNb(%.4f) = %.4f",
                 mousePointLagrange.x, mousePointLagrange.y,
                 mousePointNewtonFwd.x, mousePointNewtonFwd.y,
                 mousePointNewtonBwd.x, mousePointNewtonBwd.y);
