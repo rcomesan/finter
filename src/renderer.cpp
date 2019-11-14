@@ -280,8 +280,8 @@ namespace finter
 
         ImGui::BeginGroup();
         drawOption("Lagrange", goptLagrange);
-        drawOption("Newton Pr", goptNewtonFwd);
-        drawOption("Newton Re", goptNewtonBwd);
+        drawOption("Newton Fwd", goptNewtonFwd);
+        drawOption("Newton Bwd", goptNewtonBwd);
         ImGui::Separator();
         drawOption("Axes", goptAxes);
         drawOption("Datapoints", goptDatapoints);
