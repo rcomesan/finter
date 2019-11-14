@@ -339,6 +339,7 @@ namespace finter
         if (ImGui::BeginPopupModal("New Interpolation", &newIntpOpened, wflags))
         {
             ImGui::InputText("Name", newIntp->name, sizeof(newIntp->name));
+            Renderer::helpMarker("Syntax: Semicolon-separated list of points.\n\ne.g. x0,f(x0);x1,f(x1);x2,f(x2)");
             ImGui::InputTextMultiline("Data", newIntpBuff, INPUT_BUFFER_LEN);
             
             if (ImGui::Button("Cancel", ImVec2(248, 0)))
@@ -666,6 +667,19 @@ namespace finter
     {
         ImGui::PopStyleVar();
         ImGui::PopItemFlag();
+    }
+
+    void Renderer::helpMarker(const char* desc)
+    {
+        ImGui::TextDisabled("(?)");
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::BeginTooltip();
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted(desc);
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
     }
 
     void Renderer::resetView()

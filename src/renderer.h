@@ -124,6 +124,8 @@ namespace finter
         // imgui helpers
         static void                 pushDisabled();
         static void                 popDisabled();
+        static void                 helpMarker(const char* _desc);
+
         bool                        loadTextureFromFile(const char* filename, ID3D11ShaderResourceView** out_srv, int* out_width, int* out_height);
     };
 }
