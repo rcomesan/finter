@@ -94,6 +94,21 @@ namespace finter
         return r;
     }
 
+    void Lagrange::latexFormula(std::vector<ImVec2>& _dp, std::string& _out)
+    {
+        static char buff[255];
+        char s;
+        _out = "P(x) = ";
+
+        for (uint32_t i = 0; i < _dp.size(); i++)
+        {
+            s = i == 0 ? ' ' : '+';
+            
+            snprintf(buff, sizeof(buff), "%c f(x_%" PRIu32 ") \\cdot L_{%" PRIu32 "}(x)", s, i, i);
+            _out.append(buff);
+        }
+    }
+
     void Lagrange::latexPx(std::vector<ImVec2>& _dp, std::string& _out)
     {
         static char buff[255];

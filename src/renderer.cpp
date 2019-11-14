@@ -379,8 +379,11 @@ namespace finter
             ImGui::Text(_name);
             Renderer::drawLatex(_data.px.c_str());
 
+            ImGui::Text("Formula");
+            Renderer::drawLatex(_data.steps[0].c_str());
+
             ImGui::Text("Steps");
-            for (uint32_t i = 0; i < _data.steps.size(); i++)
+            for (uint32_t i = 1; i < _data.steps.size(); i++)
             {
                 ImGui::Separator();
                 Renderer::drawLatex(_data.steps[i].c_str());
@@ -722,11 +725,13 @@ namespace finter
         {
             if (Interpolation_Lagrange == _variant)
             {
-                latexLagrange.steps.resize(curIntp->datapoints.size());
+                latexLagrange.steps.resize(curIntp->datapoints.size() + 1);
+
+                Lagrange::latexFormula(curIntp->datapoints, latexLagrange.steps[0]);
 
                 for (uint32_t i = 0; i < curIntp->datapoints.size(); i++)
                 {
-                    Lagrange::latexLx(curIntp->datapoints, i, latexLagrange.steps[i]);
+                    Lagrange::latexLx(curIntp->datapoints, i, latexLagrange.steps[i + 1]);
                 }
             }
             else

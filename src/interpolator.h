@@ -21,6 +21,7 @@ namespace finter
     struct Lagrange
     {
         static float eval(std::vector<ImVec2>& _dp, float _x);
+        static void  latexFormula(std::vector<ImVec2>& _dp, std::string& _out);
         static void  latexPx(std::vector<ImVec2>& _dp, std::string& _out);
         static void  latexLx(std::vector<ImVec2>& _dp, uint32_t _i, std::string& _out);
 
