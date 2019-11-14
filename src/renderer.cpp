@@ -50,8 +50,6 @@ namespace finter
 
     void Renderer::Draw()
     {
-        static bool show = true;
-        ImGui::ShowDemoWindow(&show);
         drawPanelLeft();
         drawPanelMiddle();
         drawPanelBottom();
@@ -166,7 +164,9 @@ namespace finter
             | ImGuiWindowFlags_NoSavedSettings
             | ImGuiWindowFlags_NoFocusOnAppearing
             | ImGuiWindowFlags_AlwaysUseWindowPadding
-            | ImGuiWindowFlags_NoBringToFrontOnFocus;
+            | ImGuiWindowFlags_NoBringToFrontOnFocus
+            | ImGuiWindowFlags_NoScrollbar
+            | ImGuiWindowFlags_NoScrollWithMouse;
 
         ImGui::SetNextWindowPos(ImVec2(LEFT_PANEL_WIDTH, 0.0f), ImGuiCond_Always);
         ImGui::SetNextWindowSize(ImVec2(MIDDLE_PANEL_WIDTH, MIDDLE_PANEL_HEIGHT), ImGuiCond_FirstUseEver);
@@ -174,29 +174,35 @@ namespace finter
         ImGui::Begin("Graph", nullptr, wflags);
 
         graphPos = ImGui::GetCursorScreenPos();
-        ImGui::PushItemWidth(-15.0f);
-        ImGui::InvisibleButton("graph", ImVec2(MIDDLE_PANEL_WIDTH, GRAPH_HEIGHT));
 
-        ImDrawList* dl = ImGui::GetOverlayDrawList();
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 0.025f));
+        ImGui::PushItemWidth(0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::BeginChild("graph-child-container", ImVec2(0, GRAPH_HEIGHT), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+        float w = ImGui::GetContentRegionAvailWidth();
+
+        ImDrawList* dl = ImGui::GetWindowDrawList();        
 
         if (goptAxes.visible)
             drawGraphAxes(dl, goptAxes.color);
 
         if (goptLagrange.visible)
         {
-            Renderer::drawGraphCurve(gdataLagrange.yS, rangeMin.y, rangeMax.y, goptLagrange.color, ImVec2(0.0f, GRAPH_HEIGHT));
+            Renderer::drawGraphCurve(gdataLagrange.yS, rangeMin.y, rangeMax.y, goptLagrange.color, ImVec2(w, GRAPH_HEIGHT));
             Renderer::drawGraphPoint(dl, mousePointLagrange, false, goptLagrange.color);
         }
    
         if (goptNewtonPr.visible)
         {
-            Renderer::drawGraphCurve(gdataNewtonPr.yS, rangeMin.y, rangeMax.y, goptNewtonPr.color, ImVec2(0.0f, GRAPH_HEIGHT));
+            Renderer::drawGraphCurve(gdataNewtonPr.yS, rangeMin.y, rangeMax.y, goptNewtonPr.color, ImVec2(w, GRAPH_HEIGHT));
             Renderer::drawGraphPoint(dl, mousePointNewtonPr, false, goptNewtonPr.color);
         }
 
         if (goptNewtonRe.visible)
         {
-            Renderer::drawGraphCurve(gdataNewtonRe.yS, rangeMin.y, rangeMax.y, goptNewtonRe.color, ImVec2(0.0f, GRAPH_HEIGHT));
+            Renderer::drawGraphCurve(gdataNewtonRe.yS, rangeMin.y, rangeMax.y, goptNewtonRe.color, ImVec2(w, GRAPH_HEIGHT));
             Renderer::drawGraphPoint(dl, mousePointNewtonRe, false, goptNewtonRe.color);
         }
 
@@ -224,8 +230,10 @@ namespace finter
                 mousePointNewtonPr.x, mousePointNewtonPr.y,
                 mousePointNewtonRe.x, mousePointNewtonRe.y);
         }
-        ImGui::Separator();
+        ImGui::EndChild();
         ImGui::PopItemWidth();
+        ImGui::PopStyleVar(2);
+        ImGui::PopStyleColor();
 
         ImGui::End();
     }
