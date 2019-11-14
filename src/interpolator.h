@@ -50,6 +50,7 @@ namespace finter
         char                            name[INTERPOLATION_NAME_LEN];
         std::vector<ImVec2>             datapoints;
         ImVec2*                         datapointSelected;
+        bool                            datapointsEquidistant;
         std::vector<std::vector<float>> diffs;
 
         static bool                     parseData(const char* _inBuff, std::vector<ImVec2>& _outData);

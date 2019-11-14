@@ -112,10 +112,9 @@ namespace finter
         {
             ImGui::InputText("Name", curIntp->name, sizeof(curIntp->name));
             drawListboxDataPoints(curIntp->datapoints, &curIntp->datapointSelected);
+            ImGui::LabelText("Equidistant", curIntp->datapointsEquidistant ? "Yes" : "No");
 
             ImGui::Separator();
-
-            const char* name;
 
             if (ImGui::BeginTabBar("Polynomials", ImGuiTabBarFlags_None))
             {
@@ -678,6 +677,22 @@ namespace finter
         float x = rangeMin.x;
         float y = 0.0f;
 
+        curIntp->datapointsEquidistant = true;
+        float dist;
+        if (curIntp->datapoints.size() >= 2)
+        {
+            dist = abs(curIntp->datapoints[1].x - curIntp->datapoints[0].x);
+
+            for (uint32_t i = 0; i < curIntp->datapoints.size() - 1; i++)
+            {
+                if (dist != abs(curIntp->datapoints[i + 1].x - curIntp->datapoints[i].x))
+                {
+                    curIntp->datapointsEquidistant = false;
+                    break;
+                }
+            }
+        }
+        
         gdataLagrange.yS.clear();
         gdataLagrange.yS.reserve(_steps);
         gdataLagrange.min = FLT_MAX;
