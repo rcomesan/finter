@@ -435,7 +435,7 @@ namespace finter
         if (ImGui::Button("Add Rnd"))
         {
             isModified = true;
-            static uint32_t rgX = (uint32_t)(abs(rangeMax.x - rangeMin.x));
+            static uint32_t rgX = (uint32_t)(fabs(rangeMax.x - rangeMin.x));
             _data.emplace_back(rangeMin.x + rand() % rgX, rangeMin.x + rand() % rgX);
         }
 
@@ -701,11 +701,11 @@ namespace finter
         float dist;
         if (curIntp->datapoints.size() >= 2)
         {
-            dist = abs(curIntp->datapoints[1].x - curIntp->datapoints[0].x);
+            dist = fabs(curIntp->datapoints[1].x - curIntp->datapoints[0].x);
 
             for (uint32_t i = 0; i < curIntp->datapoints.size() - 1; i++)
             {
-                if (dist != abs(curIntp->datapoints[i + 1].x - curIntp->datapoints[i].x))
+                if (dist != fabs(curIntp->datapoints[i + 1].x - curIntp->datapoints[i].x))
                 {
                     curIntp->datapointsEquidistant = false;
                     break;

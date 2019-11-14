@@ -65,7 +65,7 @@ namespace finter
             _outSign = _v < 0 ? '+' : '-';
         }
 
-        _outV = abs(_v);
+        _outV = fabs(_v);
     }
 }
 #endif // MATH_H_
