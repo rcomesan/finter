@@ -57,6 +57,7 @@ namespace finter
         Interpolator                interpolator;               // interpolations manager.
         Interpolation*              curIntp;                    // current interpolation selected.
         ImVec2                      curPoint;                   // current point being evaluated (in plane space).
+        InterpolationVariant        curVariant;                 // current interpolation variant tab active/selected.
 
         ImVec2                      graphPos;                   // position of the graph being rendered.
         ImVec2                      graphSize;                  // size of the graph being rendered.
@@ -94,7 +95,7 @@ namespace finter
 
         // methods
         void                        refreshGraphValues(uint32_t _steps = 1000);
-        void                        refreshLatexFormulas(bool _steps);
+        void                        refreshLatexFormulas(InterpolationVariant _variant, bool _steps);
         void                        resetView();
 
         // functions for converting from/to plane and screen coordinate spaces

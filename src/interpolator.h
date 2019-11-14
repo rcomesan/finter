@@ -10,6 +10,14 @@
 
 namespace finter
 {
+    enum InterpolationVariant
+    {
+        Interpolation_None,
+        Interpolation_Lagrange,
+        Interpolation_NewtonPr,
+        Interpolation_NewtonRe,
+    };
+
     struct Lagrange
     {
         static float eval(std::vector<ImVec2>& _dp, float _x);
@@ -24,7 +32,13 @@ namespace finter
     {
         static float eval(std::vector<ImVec2>& _dp, float _x, bool _pro, std::vector<std::vector<float>>& _diffs);
         static float eval(std::vector<ImVec2>& _dp, float _x, bool _pro);
+        static void  latexFormula(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _pro, std::string& _out);
+        static void  latexPx(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _pro, std::string& _out);
+        static void  latexFx(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _pro, uint32_t _from, uint32_t _to, std::string& _out);
         static void  calculateDiffs(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _outDiffs);
+
+    private:
+        inline static float getY(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, uint32_t _order, uint32_t _index);
     };
 
     struct Interpolation

@@ -53,5 +53,19 @@ namespace finter
             ? fclamp(_v, _toMin, _toMax)
             : _v;
     }
+
+    inline void simplifySigns(bool _isSum, float _v, char& _outSign, float& _outV)
+    {
+        if (_isSum)
+        {
+            _outSign = _v < 0 ? '-' : '+';
+        }
+        else
+        {
+            _outSign = _v < 0 ? '+' : '-';
+        }
+
+        _outV = abs(_v);
+    }
 }
 #endif // MATH_H_

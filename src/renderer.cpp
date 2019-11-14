@@ -37,6 +37,7 @@ namespace finter
 
         rangeMin = { -100, -100 };
         rangeMax = { 100, 100 };
+        curVariant = Interpolation_Lagrange;
 
         latexLagrange.steps.reserve(MAX_DATAPOINTS);
         latexNewtonPr.steps.reserve(MAX_DATAPOINTS);
@@ -58,7 +59,8 @@ namespace finter
 
     void Renderer::drawPanelLeft()
     {
-       static bool selected;
+        bool selected = false;
+        bool tabChanged = false;
 
         ImGuiWindowFlags wflags = ImGuiWindowFlags_None
             | ImGuiWindowFlags_NoTitleBar
@@ -96,7 +98,7 @@ namespace finter
                 {
                     curIntp = &interpolation;
                     Renderer::refreshGraphValues();
-                    Renderer::refreshLatexFormulas(false);
+                    Renderer::refreshLatexFormulas(curVariant, false);
                     Renderer::resetView();
                 }
                 ImGui::PopID();
@@ -119,18 +121,28 @@ namespace finter
             {
                 if (Renderer::drawTab("Lagrange", latexLagrange))
                 {
+                    tabChanged = true;
+                    curVariant = Interpolation_Lagrange;
                     curPoint.y = curIntp->evalLagrange(curPoint.x);
                 }
 
-                if (Renderer::drawTab("Newton Pr", latexNewtonPr))
+                if (Renderer::drawTab("Newton Progressive", latexNewtonPr))
                 {
+                    tabChanged = true;
+                    curVariant = Interpolation_NewtonPr;
                     curPoint.y = curIntp->evalNewtonPr(curPoint.x);
                 }
                 
-                if (Renderer::drawTab("Newton Re", latexNewtonRe))
+                if (Renderer::drawTab("Newton Regressive", latexNewtonRe))
                 {
+                    tabChanged = true;
+                    curVariant = Interpolation_NewtonRe;
                     curPoint.y = curIntp->evalNewtonRe(curPoint.x);
                 }
+
+                if (tabChanged)
+                    Renderer::refreshLatexFormulas(curVariant, false);
+
 
                 ImGui::EndTabBar();
             }
@@ -288,7 +300,7 @@ namespace finter
             if (ImGui::Button("Show Step-by-Step Solution", ImVec2(ImGui::GetContentRegionAvailWidth(), 0.0f)))
             {
                 stepByStepOpened = true;
-                Renderer::refreshLatexFormulas(true);
+                Renderer::refreshLatexFormulas(curVariant, true);
                 ImGui::OpenPopup("Step-by-Step Solution");
             }
             drawPopupStepByStepSolution(_name, _latex);
@@ -367,6 +379,7 @@ namespace finter
             ImGui::Text(_name);
             Renderer::drawLatex(_data.px.c_str());
 
+            ImGui::Text("Steps");
             for (uint32_t i = 0; i < _data.steps.size(); i++)
             {
                 ImGui::Separator();
@@ -386,21 +399,6 @@ namespace finter
     {
         bool isSelected = false;     // true if a given list item is currently selected
         bool isModified = false;     // true if our dataset was modified and a recalculation is needed
-
-        if (ImGui::ListBoxHeader("Datapoints"))
-        {
-            for (auto it = _data.begin(); it != _data.end(); ++it)
-            {
-                isSelected = &(*it) == (*_pointSelected);
-                isModified = drawListitemPoint(*it, &isSelected) || isModified;
-
-                if (isSelected)
-                {
-                    (*_pointSelected) = &(*it);
-                }
-            }
-            ImGui::ListBoxFooter();
-        }
 
         if (ImGui::Button("Clear"))
         {
@@ -430,12 +428,27 @@ namespace finter
             _data.emplace_back(rangeMin.x + rand() % rgX, rangeMin.x + rand() % rgX);
         }
 
+        if (ImGui::ListBoxHeader("Datapoints"))
+        {
+            for (auto it = _data.begin(); it != _data.end(); ++it)
+            {
+                isSelected = &(*it) == (*_pointSelected);
+                isModified = drawListitemPoint(*it, &isSelected) || isModified;
+
+                if (isSelected)
+                {
+                    (*_pointSelected) = &(*it);
+                }
+            }
+            ImGui::ListBoxFooter();
+        }
+
         if (isModified)
         {
             curIntp->recalculateDiffs();
             curPoint.y = Lagrange::eval(curIntp->datapoints, curPoint.x);
             Renderer::refreshGraphValues();
-            Renderer::refreshLatexFormulas(false);
+            Renderer::refreshLatexFormulas(curVariant, false);
             Renderer::resetView();
         }
     }
@@ -698,20 +711,50 @@ namespace finter
         }
     }
 
-    void Renderer::refreshLatexFormulas(bool _steps)
+    void Renderer::refreshLatexFormulas(InterpolationVariant _variant, bool _steps)
     {
+        uint32_t s = 0;
+
+        bool newtonPro = Interpolation_NewtonPr == _variant;
+        LatexData& _dataNw = newtonPro ? latexNewtonPr : latexNewtonRe;
+
         if (_steps)
         {
-            latexLagrange.steps.resize(curIntp->datapoints.size());
-
-            for (uint32_t i = 0; i < curIntp->datapoints.size(); i++)
+            if (Interpolation_Lagrange == _variant)
             {
-                Lagrange::latexLx(curIntp->datapoints, i, latexLagrange.steps[i]);
+                latexLagrange.steps.resize(curIntp->datapoints.size());
+
+                for (uint32_t i = 0; i < curIntp->datapoints.size(); i++)
+                {
+                    Lagrange::latexLx(curIntp->datapoints, i, latexLagrange.steps[i]);
+                }
+            }
+            else
+            {
+                _dataNw.steps.resize(500);
+                Newton::latexFormula(curIntp->datapoints, curIntp->diffs, newtonPro, _dataNw.steps[0]);
+
+                s = 1;
+                for (uint32_t diffOrder = 1; diffOrder < curIntp->diffs.size(); diffOrder++)
+                {
+                    for (uint32_t diffIndex = 0; diffIndex < curIntp->diffs[diffOrder].size(); diffIndex++)
+                    {
+                        Newton::latexFx(curIntp->datapoints, curIntp->diffs, newtonPro, diffIndex, diffIndex + diffOrder, _dataNw.steps[s++]);
+                    }
+                }
+                _dataNw.steps.resize(s);
             }
         }
         else
         {
-            Lagrange::latexPx(curIntp->datapoints, latexLagrange.px);
+            if (Interpolation_Lagrange == _variant)
+            {
+                Lagrange::latexPx(curIntp->datapoints, latexLagrange.px);
+            }
+            else
+            {
+                Newton::latexPx(curIntp->datapoints, curIntp->diffs, newtonPro, _dataNw.px);
+            }
         }
     }
 }
