@@ -577,16 +577,14 @@ namespace finter
 
                 if (texLru.size() >= TEXTURES_CACHE_SIZE)
                 {
-                    auto it = texLru.end();
                     for (int32_t i = 0; i < texLru.size() - TEXTURES_CACHE_SIZE + 1; i++)
                     {
-                        texLru.erase(it);
+                        auto it = std::prev(texLru.end());
                         texMap.erase((*it)->latex);
-
                         (*it)->srv->Release();
-                        delete (*it);
-
-                        it--;
+                        
+                        delete *it;
+                        texLru.erase(it);                        
                     }
                 }
                 texLru.push_front(texd);

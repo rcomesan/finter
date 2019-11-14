@@ -16,10 +16,10 @@
 #define BOTTOM_PANEL_HEIGHT VIEWPORT_HEIGHT - MIDDLE_PANEL_HEIGHT
 
 #define INPUT_BUFFER_LEN 1024 * 5
-#define INTERPOLATION_NAME_LEN 255
+#define INTERPOLATION_NAME_LEN 256
 
-#define MAX_DATAPOINTS 255
-#define TEXTURES_CACHE_SIZE 256
+#define MAX_DATAPOINTS 256
+#define TEXTURES_CACHE_SIZE 255
 
 #define ZERO_MEM(_var)                                                                  \
     memset(&(_var), 0, sizeof((_var)));
