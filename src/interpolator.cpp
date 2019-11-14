@@ -98,6 +98,7 @@ namespace finter
     {
         static char buff[255];
         char s;
+
         _out = "P(x) = ";
 
         for (uint32_t i = 0; i < _dp.size(); i++)
@@ -112,14 +113,14 @@ namespace finter
     void Lagrange::latexPx(std::vector<ImVec2>& _dp, std::string& _out)
     {
         static char buff[255];
-        static float v;
-        static char  s;
+        float v;
+        char  s;
 
         _out = "P(x) = ";
 
         for (uint32_t i = 0; i < _dp.size(); i++)
         {
-            simplifySigns(true, _dp[i].y, s, v);
+            simplifySigns(true, _dp[i].y, &s, &v);
             if (i == 0 && s == '+') s = ' ';
 
             snprintf(buff, sizeof(buff), "%c %.4g \\cdot L_{%" PRIu32 "}(x)", s, v, i);
@@ -130,8 +131,8 @@ namespace finter
     void Lagrange::latexLx(std::vector<ImVec2>& _dp, uint32_t _i, std::string& _out)
     {
         static char buff[255];
-        static float v;
-        static char  s;
+        float v;
+        char  s;
 
         static std::string tmp;
         tmp.reserve(2500);
@@ -146,11 +147,11 @@ namespace finter
         {
             if (index != _i)
             {
-                simplifySigns(false, _dp[index].x, s, v);
+                simplifySigns(false, _dp[index].x, &s, &v);
                 snprintf(buff, sizeof(buff), "(x  %c %.4g)", s, v);
                 _out.append(buff);
 
-                simplifySigns(false, _dp[index].x, s, v);
+                simplifySigns(false, _dp[index].x, &s, &v);
                 snprintf(buff, sizeof(buff), "(%.4g %c %.4g)", _dp[_i].x, s, v);
                 tmp.append(buff);
             }
@@ -221,8 +222,8 @@ namespace finter
     void Newton::latexPx(std::vector<ImVec2>& _dp, std::vector<std::vector<float>>& _diffs, bool _fwd, std::string& _out)
     {
         static char  buff[255];
-        static float v;
-        static char  s;
+        float v;
+        char  s;
 
         snprintf(buff, sizeof(buff), "P(x)=%.4g", _fwd ? _dp[0].y : _dp[_dp.size() - 1].y);
 
@@ -231,14 +232,14 @@ namespace finter
 
         for (uint32_t i = 1; i < _diffs.size(); i++)
         {
-            simplifySigns(true, _diffs[i][_fwd ? 0 : _diffs[i].size() - 1], s, v);
+            simplifySigns(true, _diffs[i][_fwd ? 0 : _diffs[i].size() - 1], &s, &v);
             snprintf(buff, sizeof(buff), " %c %.4g \\cdot", s, v);
             _out.append(buff);
 
 
             for (uint32_t j = 0; j <= i - 1; j++)
             {
-                simplifySigns(false, _dp[_fwd ? j : _dp.size() - 1 - j].x, s, v);
+                simplifySigns(false, _dp[_fwd ? j : _dp.size() - 1 - j].x, &s, &v);
                 snprintf(buff, sizeof(buff), " (x %c %.4g)", s, v);
                 _out.append(buff);
             }
@@ -267,8 +268,8 @@ namespace finter
         float v1, v2;
         char s1, s2;
 
-        simplifySigns(false, Newton::getY(_dp, _diffs, diffOrderPrev, _from), s1, v1);
-        simplifySigns(false, _dp[_from].x, s2, v2);
+        simplifySigns(false, Newton::getY(_dp, _diffs, diffOrderPrev, _from), &s1, &v1);
+        simplifySigns(false, _dp[_from].x, &s2, &v2);
 
         snprintf(buff, sizeof(buff), "{{%.4g %c %.4g} \\above{1pt} {%.4g %c %.4g}} = %.4g",
             Newton::getY(_dp, _diffs, diffOrderPrev, _from + 1), s1, v1,

@@ -54,18 +54,18 @@ namespace finter
             : _v;
     }
 
-    inline void simplifySigns(bool _isSum, float _v, char& _outSign, float& _outV)
+    inline void simplifySigns(bool _isSum, float _v, char* _outSign, float* _outV)
     {
-        if (_isSum)
+        *_outV = fabs(_v);
+
+        if (_isSum && _v >= 0 || !_isSum && _v <= 0)
         {
-            _outSign = _v < 0 ? '-' : '+';
+            *_outSign = '+';
         }
         else
         {
-            _outSign = _v < 0 ? '+' : '-';
+            *_outSign = '-';
         }
-
-        _outV = fabs(_v);
     }
 }
 #endif // MATH_H_
